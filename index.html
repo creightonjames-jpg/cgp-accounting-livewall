@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>CGP Accounting Meeting · Live Wall</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -440,8 +439,10 @@ const EVENT = {
   shortName: "Accounting Live Wall",
   startISO: "2026-09-16T12:00:00-05:00",
   // Sep 16, 12:00 PM Dallas (Central, CDT = UTC-5)
-  url: "https://centurygolf.github.io/acct-livewall/" // [PLACEHOLDER] page URL the QR points to
+  url: "https://creightonjames-jpg.github.io/cgp-accounting-livewall/" // [PLACEHOLDER] page URL the QR points to
 };
+const QR_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyCAIAAABnRsZeAAAHwElEQVR4nO3cQWpkNxhG0Tj0NJB59r+0zANZQGUDQTTo/i2953Pmrnqusi8afOjr8/n8BtD5/fQDAG8jK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQExWgNiPnR/+468/o8e4xb9//zP0yjuf1fqpvPLPW7/v3Cs/0c6n4bQCxGQFiMkKEJMVICYrQExWgJisADFZAWKyAsS2VrZrc4vVHXNryJ0F5/pnTz3z2s73O7fBndvR7vhu/wtOK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgJitAbHBluza38LvzPtpTv69bY3/+Z09tYZ/4v7DmtALEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxI6tbN/nznXvqaeau+l2be5G4Tvvo72T0woQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKELOy/UV2Fpx37jvn7tDded81O9pfw2kFiMkKEJMVICYrQExWgJisADFZAWKyAsRkBYgdW9m+b9E4tyudu5917c5Xft9S9onPvOa0AsRkBYjJChCTFSAmK0BMVoCYrAAxWQFisgLEBle2c6vTO52623XHzjPfeZft3DPP3aH7Pk4rQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0Bsa2X7vjs4T7lzkzr3vjueuP39bpxWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoDY1sr2zr3jjvUz37ng3HnfO+9nnXuquU/yiX/Pc5xWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoDY4F2279sd3vkbrT3x9517350N7pxT/0dzn4bTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQ21rZzpnbO87d/HrnK995w+6dtwKvzW1ST31Wc/9lTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQGxrZXtqd7hjblm4s4ac21me+hZO3Qu7Y27NfOf/grtsgceQFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQu/Qu2zl33rG6484bdu9cBt95s+/c+8797JrTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQG1zZzi0p1+Y2mqeWozvuvEV1x6nvaO424rW5G3bX3GULXERWgJisADFZAWKyAsRkBYjJChCTFSAmK0BscGV7ald66vbWU564DJ77nO/cOq/d+S3scFoBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWJfn8/nyBvfuQ09taN93yJ57n3XnriTnnvmU39XTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQGxrZXvnrbFzC90n7h3n3Hlr7J3f751/OXPfoNMKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChA7trLd8cTF6qlN6qk7g0/dVrt25y3Id25/rWyBi8gKEJMVICYrQExWgJisADFZAWKyAsRkBYhdepftzvt+t+XojlOf5NqdT7XjiRvcHU4rQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0Bsa2W79sQ7OO+8cXbH+9aud+5o107d+rxmZQs8hqwAMVkBYrICxGQFiMkKEJMVICYrQExWgNjgXbZP3KTuuPOO1e+2dn3iMnjHnX91TitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQOzH6Qf4f+/bpM6tIecWnDuv/L7beU+98o5TG1ynFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgdmxle+c29NT7ntrgnvqs7lydnnrl930LTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQOzYynbufta5veOpHe2OU7eZ3rnuXbvz/t0ncloBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWKX3mV7582gc0/1xBXm3A27d377O564Gt95X6cVICYrQExWgJisADFZAWKyAsRkBYjJChCTFSD29fl8Tj/DY8ztSne8b6G744lL6Pf9XTmtADFZAWKyAsRkBYjJChCTFSAmK0BMVoCYrACxrbts77w3dMd6WfjEPevaqTtWT93POueJdxXPPZXTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQ21rZrt25LNxZYc5tUuduM93ZDc8tVuc2qU+8+XXt1BJ6h9MKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChAbXNmuPXHvOPe+d94LO7fu3XFqr3znzc2nvv01pxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVIHZsZcvPO7WFPbWjnbudd+3Up3HqzuA5TitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQMzK9uV2lqM75ta9T3zftbmnOnWvs9MKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChA7trI9tf/b8cSbX9dObXDXTn3Op9auT7xveM1pBYjJChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIDa5sT20055y6+XXHnfvOnZ+1DL7hfdecVoCYrAAxWQFisgLEZAWIyQoQkxUgJitATFaA2Nfn8zn9DMCrOK0AMVkBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoCYrAAxWQFisgLE/gMRJ/2DCNo7BgAAAABJRU5ErkJggg=="; // QR -> EVENT.url, generated offline
+
 const store = (() => {
   const PREFIX = EVENT.id + "_db_";
   const subs = {}; // node -> Set(callback)
@@ -733,7 +734,6 @@ function TeaserWelcome({
     h = Math.floor(diff / 3600000) % 24,
     m = Math.floor(diff / 60000) % 60,
     s = Math.floor(diff / 1000) % 60;
-  const qr = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(EVENT.url);
   return /*#__PURE__*/React.createElement("div", {
     className: "welcome"
   }, /*#__PURE__*/React.createElement(Logo, null), /*#__PURE__*/React.createElement("h1", null, EVENT.name), /*#__PURE__*/React.createElement("div", {
@@ -748,8 +748,8 @@ function TeaserWelcome({
   }, String(v).padStart(2, "0")), /*#__PURE__*/React.createElement("span", null, l)))), /*#__PURE__*/React.createElement("div", {
     className: "qr"
   }, /*#__PURE__*/React.createElement("img", {
-    src: qr,
-    alt: "QR code"
+    src: QR_SRC,
+    alt: "QR code linking to the Live Wall"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("button", {
     className: "btn-gold",
     style: {
@@ -762,7 +762,7 @@ function TeaserWelcome({
     style: {
       marginTop: 14
     }
-  }, "Starts 12:00 PM, September 16, Dallas. Placeholder QR target."));
+  }, "Tell us what's on your mind. Submit your questions now, and we'll be sure to address them at the meeting."));
 }
 function TeaserApp() {
   const [view, setView] = useState("welcome");
