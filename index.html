@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>CGP Accounting Meeting · Live Wall</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 :root {
@@ -123,7 +127,10 @@
 .cgp-logo { width: 200px; height: auto; display: block; margin: 0 auto 16px; }
 body.display-mode .cgp-logo { width: 260px; }
 
-</style></head><body><div id="root"></div>
+</style>
+</head>
+<body>
+<div id="root"></div>
 <script>/**
  * @license React
  * react.production.min.js
@@ -155,7 +162,8 @@ render:a}};c.isValidElement=M;c.lazy=function(a){return{$$typeof:Aa,_payload:{_s
 c.useEffect=function(a,b){return g.current.useEffect(a,b)};c.useId=function(){return g.current.useId()};c.useImperativeHandle=function(a,b,c){return g.current.useImperativeHandle(a,b,c)};c.useInsertionEffect=function(a,b){return g.current.useInsertionEffect(a,b)};c.useLayoutEffect=function(a,b){return g.current.useLayoutEffect(a,b)};c.useMemo=function(a,b){return g.current.useMemo(a,b)};c.useReducer=function(a,b,c){return g.current.useReducer(a,b,c)};c.useRef=function(a){return g.current.useRef(a)};
 c.useState=function(a){return g.current.useState(a)};c.useSyncExternalStore=function(a,b,c){return g.current.useSyncExternalStore(a,b,c)};c.useTransition=function(){return g.current.useTransition()};c.version="18.3.1"});
 })();
-</script><script>/**
+</script>
+<script>/**
  * @license React
  * react-dom.production.min.js
  *
@@ -423,6 +431,9 @@ var d=null!=c&&c.hydratedSources||null,e=!1,f="",g=aj;null!==c&&void 0!==c&&(!0=
 function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmountComponentAtNode=function(a){if(!Vd(a))throw Error(m(40));return a._reactRootContainer?(yb(function(){Wd(null,null,a,!1,function(){a._reactRootContainer=null;a[Ja]=null})}),!0):!1};Q.unstable_batchedUpdates=Tf;Q.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!Vd(c))throw Error(m(200));if(null==a||void 0===a._reactInternals)throw Error(m(38));return Wd(a,b,c,!1,d)};Q.version="18.3.1-next-f1338f8080-20240426"});
 })();
 </script>
+<!-- Firebase SDK (compat). Only used when FIREBASE_CONFIG is filled in. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 try {
 const {
@@ -437,16 +448,112 @@ const EVENT = {
   // same event id as the full wall -> Q&A data is shared
   name: "CGP Annual Accounting Meeting",
   shortName: "Accounting Live Wall",
+  pin: "1126",
+  // admin PIN (same as full wall)
   startISO: "2026-09-16T12:00:00-05:00",
   // Sep 16, 12:00 PM Dallas (Central, CDT = UTC-5)
   url: "https://creightonjames-jpg.github.io/cgp-accounting-livewall/" // [PLACEHOLDER] page URL the QR points to
 };
 const QR_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyCAIAAABnRsZeAAAHwElEQVR4nO3cQWpkNxhG0Tj0NJB59r+0zANZQGUDQTTo/i2953Pmrnqusi8afOjr8/n8BtD5/fQDAG8jK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQExWgNiPnR/+468/o8e4xb9//zP0yjuf1fqpvPLPW7/v3Cs/0c6n4bQCxGQFiMkKEJMVICYrQExWgJisADFZAWKyAsS2VrZrc4vVHXNryJ0F5/pnTz3z2s73O7fBndvR7vhu/wtOK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgJitAbHBluza38LvzPtpTv69bY3/+Z09tYZ/4v7DmtALEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxI6tbN/nznXvqaeau+l2be5G4Tvvo72T0woQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKELOy/UV2Fpx37jvn7tDded81O9pfw2kFiMkKEJMVICYrQExWgJisADFZAWKyAsRkBYgdW9m+b9E4tyudu5917c5Xft9S9onPvOa0AsRkBYjJChCTFSAmK0BMVoCYrAAxWQFisgLEBle2c6vTO52623XHzjPfeZft3DPP3aH7Pk4rQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0Bsa2X7vjs4T7lzkzr3vjueuP39bpxWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoDY1sr2zr3jjvUz37ng3HnfO+9nnXuquU/yiX/Pc5xWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoDY4F2279sd3vkbrT3x9517350N7pxT/0dzn4bTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQ21rZzpnbO87d/HrnK995w+6dtwKvzW1ST31Wc/9lTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQGxrZXtqd7hjblm4s4ac21me+hZO3Qu7Y27NfOf/grtsgceQFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQu/Qu2zl33rG6484bdu9cBt95s+/c+8797JrTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQG1zZzi0p1+Y2mqeWozvuvEV1x6nvaO424rW5G3bX3GULXERWgJisADFZAWKyAsRkBYjJChCTFSAmK0BscGV7ald66vbWU564DJ77nO/cOq/d+S3scFoBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWJfn8/nyBvfuQ09taN93yJ57n3XnriTnnvmU39XTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQGxrZXvnrbFzC90n7h3n3Hlr7J3f751/OXPfoNMKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChA7trLd8cTF6qlN6qk7g0/dVrt25y3Id25/rWyBi8gKEJMVICYrQExWgJisADFZAWKyAsRkBYhdepftzvt+t+XojlOf5NqdT7XjiRvcHU4rQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0Bsa2W79sQ7OO+8cXbH+9aud+5o107d+rxmZQs8hqwAMVkBYrICxGQFiMkKEJMVICYrQExWgNjgXbZP3KTuuPOO1e+2dn3iMnjHnX91TitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQOzH6Qf4f+/bpM6tIecWnDuv/L7beU+98o5TG1ynFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgdmxle+c29NT7ntrgnvqs7lydnnrl930LTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQOzYynbufta5veOpHe2OU7eZ3rnuXbvz/t0ncloBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWKX3mV7582gc0/1xBXm3A27d377O564Gt95X6cVICYrQExWgJisADFZAWKyAsRkBYjJChCTFSD29fl8Tj/DY8ztSne8b6G744lL6Pf9XTmtADFZAWKyAsRkBYjJChCTFSAmK0BMVoCYrACxrbts77w3dMd6WfjEPevaqTtWT93POueJdxXPPZXTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQ21rZrt25LNxZYc5tUuduM93ZDc8tVuc2qU+8+XXt1BJ6h9MKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChAbXNmuPXHvOPe+d94LO7fu3XFqr3znzc2nvv01pxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVIHZsZcvPO7WFPbWjnbudd+3Up3HqzuA5TitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQMzK9uV2lqM75ta9T3zftbmnOnWvs9MKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChA7trI9tf/b8cSbX9dObXDXTn3Op9auT7xveM1pBYjJChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIDa5sT20055y6+XXHnfvOnZ+1DL7hfdecVoCYrAAxWQFisgLEZAWIyQoQkxUgJitATFaA2Nfn8zn9DMCrOK0AMVkBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoCYrAAxWQFisgLE/gMRJ/2DCNo7BgAAAABJRU5ErkJggg=="; // QR -> EVENT.url, generated offline
 
+/* ============================================================
+   FIREBASE CONFIG
+   Paste the values from your Firebase console here.
+   Firebase console -> Project settings -> General -> Your apps -> Web app -> Config.
+   Until the databaseURL is filled in (no "PASTE"), the app runs on
+   localStorage only (per-device, no sharing). Fill it in to go live.
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCx07L7uqvyBn5dCbQyoxRU-0rG02tgU1M",
+  authDomain: "acc-live-wall.firebaseapp.com",
+  databaseURL: "https://acc-live-wall-default-rtdb.firebaseio.com",
+  projectId: "acc-live-wall",
+  storageBucket: "acc-live-wall.firebasestorage.app",
+  messagingSenderId: "970307236492",
+  appId: "1:970307236492:web:b326189ea6428c5643c1a9"
+};
+const USE_FIREBASE = typeof firebase !== "undefined" && FIREBASE_CONFIG.databaseURL.indexOf("PASTE") === -1;
+
+/* ============================================================
+   DATA LAYER
+   One interface, two backends. When Firebase is configured and
+   reachable, all shared state lives in the Realtime Database and
+   every device syncs live. Otherwise it falls back to localStorage
+   so the app still runs for local editing and offline demos.
+   Components never change: they use store.* and the useNode hook.
+   Data is namespaced under EVENT.id so events never collide.
+   ============================================================ */
 const store = (() => {
   const PREFIX = EVENT.id + "_db_";
   const subs = {}; // node -> Set(callback)
+  const cache = {}; // node -> object (in-memory shared truth for sync reads)
+  const loaded = {}; // node -> bool (first snapshot received)
+  const pushKey = () => "k" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const notify = node => {
+    if (subs[node]) subs[node].forEach(cb => cb(cache[node] || {}));
+  };
+  if (USE_FIREBASE) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.database();
+    const ref = node => db.ref(EVENT.id + "/" + node);
+    const attached = {};
+    const ensure = node => {
+      if (attached[node]) return;
+      attached[node] = true;
+      ref(node).on("value", snap => {
+        cache[node] = snap.val() || {};
+        loaded[node] = true;
+        notify(node);
+      });
+    };
+    return {
+      list(node) {
+        ensure(node);
+        const o = cache[node] || {};
+        return Object.keys(o).map(k => ({
+          ...o[k],
+          _key: k
+        })).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+      },
+      object(node) {
+        ensure(node);
+        return cache[node] || {};
+      },
+      isLoaded(node) {
+        return !!loaded[node];
+      },
+      push(node, entry) {
+        ensure(node);
+        const r = ref(node).push();
+        r.set({
+          ...entry,
+          ts: entry.ts || firebase.database.ServerValue.TIMESTAMP
+        });
+        return r.key;
+      },
+      update(node, key, patch) {
+        ref(node).child(key).update(patch);
+      },
+      remove(node, key) {
+        ref(node).child(key).remove();
+      },
+      setNode(node, value) {
+        ref(node).set(value || {});
+      },
+      clearNode(node) {
+        ref(node).remove();
+      },
+      subscribe(node, cb) {
+        ensure(node);
+        if (!subs[node]) subs[node] = new Set();
+        subs[node].add(cb);
+        cb(cache[node] || {});
+        return () => subs[node].delete(cb);
+      }
+    };
+  }
 
+  // ---- localStorage fallback ----
   const read = node => {
     try {
       return JSON.parse(localStorage.getItem(PREFIX + node) || "{}");
@@ -458,41 +565,42 @@ const store = (() => {
     localStorage.setItem(PREFIX + node, JSON.stringify(obj));
     if (subs[node]) subs[node].forEach(cb => cb(obj));
   };
-  const pushKey = () => "k" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   return {
     list(node) {
-      const obj = read(node);
-      return Object.keys(obj).map(k => ({
-        ...obj[k],
+      const o = read(node);
+      return Object.keys(o).map(k => ({
+        ...o[k],
         _key: k
       })).sort((a, b) => (a.ts || 0) - (b.ts || 0));
     },
     object(node) {
       return read(node);
     },
+    isLoaded(node) {
+      return true;
+    },
     push(node, entry) {
-      const obj = read(node);
-      const key = pushKey();
-      obj[key] = {
+      const o = read(node);
+      const k = pushKey();
+      o[k] = {
         ...entry,
         ts: entry.ts || Date.now()
       };
-      write(node, obj);
-      return key;
+      write(node, o);
+      return k;
     },
     update(node, key, patch) {
-      const obj = read(node);
-      if (!obj[key]) obj[key] = {};
-      obj[key] = {
-        ...obj[key],
+      const o = read(node);
+      o[key] = {
+        ...(o[key] || {}),
         ...patch
       };
-      write(node, obj);
+      write(node, o);
     },
     remove(node, key) {
-      const obj = read(node);
-      delete obj[key];
-      write(node, obj);
+      const o = read(node);
+      delete o[key];
+      write(node, o);
     },
     setNode(node, value) {
       write(node, value || {});
@@ -589,7 +697,7 @@ function QATab({
     onChange: e => setName(e.target.value),
     disabled: anon
   }), /*#__PURE__*/React.createElement("textarea", {
-    placeholder: "Your question…",
+    placeholder: "Your question\u2026",
     value: text,
     onChange: e => setText(e.target.value)
   }), /*#__PURE__*/React.createElement("div", {
@@ -656,7 +764,7 @@ function QATab({
   }, /*#__PURE__*/React.createElement("button", {
     className: "vote" + (local.get("qvote_" + q._key, false) ? " cast" : ""),
     onClick: () => upvote(q)
-  }, "▲ ", q.votes || 0), /*#__PURE__*/React.createElement("div", {
+  }, "\u25B2 ", q.votes || 0), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1
     }
@@ -667,7 +775,7 @@ function QATab({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "tag"
-  }, q.cat), " ", q.anon ? "Anonymous" : q.name || "Anonymous", " · ", ago(q.ts), q.answered && " · ✓ answered"))), isAdmin && /*#__PURE__*/React.createElement("div", {
+  }, q.cat), " ", q.anon ? "Anonymous" : q.name || "Anonymous", " \xB7 ", ago(q.ts), q.answered && " · ✓ answered"))), isAdmin && /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 8,
@@ -766,6 +874,19 @@ function TeaserWelcome({
 }
 function TeaserApp() {
   const [view, setView] = useState("welcome");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showPin, setShowPin] = useState(false);
+  const [pin, setPin] = useState("");
+  const submitPin = () => {
+    if (pin === EVENT.pin) {
+      setIsAdmin(true);
+      setShowPin(false);
+      setPin("");
+    } else {
+      alert("Wrong PIN.");
+      setPin("");
+    }
+  };
   if (view === "welcome") return /*#__PURE__*/React.createElement(TeaserWelcome, {
     onAsk: () => setView("qa")
   });
@@ -777,14 +898,57 @@ function TeaserApp() {
     className: "ttl"
   }, EVENT.shortName)), /*#__PURE__*/React.createElement("div", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("button", {
+  }), isAdmin && /*#__PURE__*/React.createElement("span", {
+    className: "tag",
+    style: {
+      color: "var(--gold)",
+      borderColor: "var(--gold-dim)"
+    }
+  }, "ADMIN"), /*#__PURE__*/React.createElement("button", {
     className: "iconbtn",
     title: "Back",
     onClick: () => setView("welcome")
-  }, "←")), /*#__PURE__*/React.createElement(QATab, {
-    isAdmin: false
-  }));
+  }, "\u2190"), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn" + (isAdmin ? " active" : ""),
+    title: "Admin",
+    onClick: () => {
+      if (isAdmin) setIsAdmin(false);else setShowPin(true);
+    }
+  }, "\u2699\uFE0F")), /*#__PURE__*/React.createElement(QATab, {
+    isAdmin: isAdmin
+  }), showPin && /*#__PURE__*/React.createElement("div", {
+    className: "overlay",
+    onClick: () => setShowPin(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    onClick: e => e.stopPropagation(),
+    style: {
+      maxWidth: 340
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      color: "var(--gold)",
+      marginTop: 0
+    }
+  }, "Admin access"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    inputMode: "numeric",
+    placeholder: "4-digit PIN",
+    value: pin,
+    onChange: e => setPin(e.target.value),
+    onKeyDown: e => e.key === "Enter" && submitPin()
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: submitPin
+  }, "Unlock"))));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(TeaserApp, null));
-} catch (e) { document.getElementById('root').innerHTML='<div style="padding:24px;color:#FF6B4A;font-family:monospace">App failed to start:<br><br>'+(e&&e.message?e.message:e)+'</div>'; console.error(e); }
-</script></body></html>
+} catch (e) {
+  document.getElementById('root').innerHTML =
+    '<div style="padding:24px;color:#FF6B4A;font-family:monospace">App failed to start:<br><br>' +
+    (e && e.message ? e.message : e) + '</div>';
+  console.error(e);
+}
+</script>
+</body>
+</html>
