@@ -443,19 +443,29 @@ const {
   useMemo,
   useCallback
 } = React;
+
+/* ============================================================
+   EVENT CONFIG
+   ============================================================ */
 const EVENT = {
   id: "acct26",
-  // same event id as the full wall -> Q&A data is shared
   name: "CGP Annual Accounting Meeting",
   shortName: "Accounting Live Wall",
   pin: "1126",
-  // admin PIN (same as full wall)
+  // CHANGE before launch (not LC26's 2026)
   startISO: "2026-09-16T12:00:00-05:00",
   // Sep 16, 12:00 PM Dallas (Central, CDT = UTC-5)
-  url: "https://creightonjames-jpg.github.io/cgp-accounting-livewall/" // [PLACEHOLDER] page URL the QR points to
+  url: "https://creightonjames-jpg.github.io/cgp-accounting-livewall/" // [PLACEHOLDER] GitHub Pages URL
 };
 const QR_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyCAIAAABnRsZeAAAHwElEQVR4nO3cQWpkNxhG0Tj0NJB59r+0zANZQGUDQTTo/i2953Pmrnqusi8afOjr8/n8BtD5/fQDAG8jK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQExWgNiPnR/+468/o8e4xb9//zP0yjuf1fqpvPLPW7/v3Cs/0c6n4bQCxGQFiMkKEJMVICYrQExWgJisADFZAWKyAsS2VrZrc4vVHXNryJ0F5/pnTz3z2s73O7fBndvR7vhu/wtOK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgJitAbHBluza38LvzPtpTv69bY3/+Z09tYZ/4v7DmtALEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxI6tbN/nznXvqaeau+l2be5G4Tvvo72T0woQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKELOy/UV2Fpx37jvn7tDded81O9pfw2kFiMkKEJMVICYrQExWgJisADFZAWKyAsRkBYgdW9m+b9E4tyudu5917c5Xft9S9onPvOa0AsRkBYjJChCTFSAmK0BMVoCYrAAxWQFisgLEBle2c6vTO52623XHzjPfeZft3DPP3aH7Pk4rQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0Bsa2X7vjs4T7lzkzr3vjueuP39bpxWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoDY1sr2zr3jjvUz37ng3HnfO+9nnXuquU/yiX/Pc5xWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoDY4F2279sd3vkbrT3x9517350N7pxT/0dzn4bTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQ21rZzpnbO87d/HrnK995w+6dtwKvzW1ST31Wc/9lTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQGxrZXtqd7hjblm4s4ac21me+hZO3Qu7Y27NfOf/grtsgceQFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQu/Qu2zl33rG6484bdu9cBt95s+/c+8797JrTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQG1zZzi0p1+Y2mqeWozvuvEV1x6nvaO424rW5G3bX3GULXERWgJisADFZAWKyAsRkBYjJChCTFSAmK0BscGV7ald66vbWU564DJ77nO/cOq/d+S3scFoBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWJfn8/nyBvfuQ09taN93yJ57n3XnriTnnvmU39XTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQGxrZXvnrbFzC90n7h3n3Hlr7J3f751/OXPfoNMKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChA7trLd8cTF6qlN6qk7g0/dVrt25y3Id25/rWyBi8gKEJMVICYrQExWgJisADFZAWKyAsRkBYhdepftzvt+t+XojlOf5NqdT7XjiRvcHU4rQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0Bsa2W79sQ7OO+8cXbH+9aud+5o107d+rxmZQs8hqwAMVkBYrICxGQFiMkKEJMVICYrQExWgNjgXbZP3KTuuPOO1e+2dn3iMnjHnX91TitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQOzH6Qf4f+/bpM6tIecWnDuv/L7beU+98o5TG1ynFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgdmxle+c29NT7ntrgnvqs7lydnnrl930LTitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQOzYynbufta5veOpHe2OU7eZ3rnuXbvz/t0ncloBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWKX3mV7582gc0/1xBXm3A27d377O564Gt95X6cVICYrQExWgJisADFZAWKyAsRkBYjJChCTFSD29fl8Tj/DY8ztSne8b6G744lL6Pf9XTmtADFZAWKyAsRkBYjJChCTFSAmK0BMVoCYrACxrbts77w3dMd6WfjEPevaqTtWT93POueJdxXPPZXTChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQ21rZrt25LNxZYc5tUuduM93ZDc8tVuc2qU+8+XXt1BJ6h9MKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChAbXNmuPXHvOPe+d94LO7fu3XFqr3znzc2nvv01pxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVIHZsZcvPO7WFPbWjnbudd+3Up3HqzuA5TitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQMzK9uV2lqM75ta9T3zftbmnOnWvs9MKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChA7trI9tf/b8cSbX9dObXDXTn3Op9auT7xveM1pBYjJChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIDa5sT20055y6+XXHnfvOnZ+1DL7hfdecVoCYrAAxWQFisgLEZAWIyQoQkxUgJitATFaA2Nfn8zn9DMCrOK0AMVkBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWKyAsRkBYjJChCTFSAmK0BMVoCYrAAxWQFisgLE/gMRJ/2DCNo7BgAAAABJRU5ErkJggg=="; // QR -> EVENT.url, generated offline
 
+/* ============================================================
+   DATA LAYER. localStorage now, Firebase-ready interface.
+   Mirrors the flat Firebase node model from the spec:
+   each node is an object keyed by a push key; entries carry
+   ts (timestamp) and _key. Swap `store` internals for a
+   Firebase RTDB adapter later without touching components.
+   ============================================================ */
 /* ============================================================
    FIREBASE CONFIG
    Paste the values from your Firebase console here.
@@ -616,6 +626,7 @@ const store = (() => {
     }
   };
 })();
+// React hook: live list from a node
 function useNode(node) {
   const [obj, setObj] = useState({});
   useEffect(() => store.subscribe(node, setObj), [node]);
@@ -625,6 +636,8 @@ function useNode(node) {
   })).sort((a, b) => (a.ts || 0) - (b.ts || 0)), [obj]);
   return [list, obj];
 }
+
+/* ---- device-local (one-action-per-device) helpers ---- */
 const local = {
   get(key, fallback) {
     try {
@@ -641,6 +654,8 @@ const local = {
     Object.keys(localStorage).filter(k => k.startsWith(EVENT.id + "_") && !k.startsWith(EVENT.id + "_db_")).forEach(k => localStorage.removeItem(k));
   }
 };
+
+/* ---- small utilities ---- */
 const ago = ts => {
   const s = Math.floor((Date.now() - ts) / 1000);
   if (s < 60) return s + "s ago";
@@ -650,6 +665,390 @@ const ago = ts => {
   if (h < 24) return h + "h ago";
   return Math.floor(h / 24) + "d ago";
 };
+const money = n => "$" + Number(n || 0).toLocaleString("en-US", {
+  maximumFractionDigits: 0
+});
+const pct = n => Number(n || 0).toFixed(1) + "%";
+const Flag = () => /*#__PURE__*/React.createElement("span", {
+  className: "placeholder-flag"
+}, "Placeholder data");
+
+/* ============================================================
+   PLACEHOLDER CONTENT  (clearly marked; swap for real CGP data)
+   ============================================================ */
+const AGENDA = [{
+  date: "2026-09-15",
+  label: "Day 1",
+  title: "Arrival & Foundations",
+  location: "Grand Ballroom, CGP Conference Center [PLACEHOLDER]",
+  events: [{
+    start: "08:30",
+    end: "09:00",
+    name: "Welcome & State of Accounting",
+    icon: "🎙️",
+    desc: "Opening remarks from the VP of Finance.",
+    speaker: "Chris May [PLACEHOLDER]"
+  }, {
+    start: "09:00",
+    end: "10:30",
+    name: "Month-End Close: Where We Stand",
+    icon: "📊",
+    desc: "Portfolio-wide close metrics and the path to a 5-day close."
+  }, {
+    start: "10:45",
+    end: "12:00",
+    name: "Benchmarks That Matter",
+    icon: "📈",
+    desc: "Walking the CGP benchmark library and how to use it."
+  }, {
+    start: "13:00",
+    end: "15:00",
+    name: "Case Study Workshop I",
+    icon: "🧩",
+    desc: "Teams tackle the month-end close acceleration case."
+  }]
+}, {
+  date: "2026-09-16",
+  label: "Day 2",
+  title: "Deep Dives",
+  location: "Grand Ballroom, CGP Conference Center [PLACEHOLDER]",
+  events: [{
+    start: "08:30",
+    end: "10:00",
+    name: "Cash-Flow Forecasting",
+    icon: "💵",
+    desc: "Building a 13-week rolling forecast."
+  }, {
+    start: "10:15",
+    end: "12:00",
+    name: "Audit Prep & Controls",
+    icon: "🔍",
+    desc: "SOX-style control deficiencies and remediation."
+  }, {
+    start: "13:00",
+    end: "15:00",
+    name: "Case Study Workshop II",
+    icon: "🧩",
+    desc: "Variance analysis and capex prioritization."
+  }]
+}, {
+  date: "2026-09-17",
+  label: "Day 3",
+  title: "Forward Look & Close",
+  location: "Grand Ballroom, CGP Conference Center [PLACEHOLDER]",
+  events: [{
+    start: "08:30",
+    end: "10:00",
+    name: "Systems & the GL Roadmap",
+    icon: "🖥️",
+    desc: "Evaluating GL platforms against CGP criteria."
+  }, {
+    start: "10:15",
+    end: "11:30",
+    name: "Awards & Leaderboard Reveal",
+    icon: "🏆",
+    desc: "Case study results and recognition."
+  }, {
+    start: "11:30",
+    end: "12:00",
+    name: "Closing Remarks",
+    icon: "👋",
+    desc: "Wrap-up and next steps."
+  }]
+}];
+const VENUES = {
+  conference: [{
+    name: "CGP Conference Center [PLACEHOLDER]",
+    detail: "Grand Ballroom, Level 2",
+    addr: "123 Fairway Dr, Dallas, TX",
+    phone: "214-555-0100"
+  }, {
+    name: "Host Hotel [PLACEHOLDER]",
+    detail: "Room block under 'CGP Accounting'",
+    addr: "456 Greens Blvd, Dallas, TX",
+    phone: "214-555-0188"
+  }, {
+    name: "Parking",
+    detail: "Valet at main entrance; self-park garage B",
+    addr: "",
+    phone: ""
+  }],
+  evening: [{
+    name: "Welcome Reception [PLACEHOLDER]",
+    detail: "Sep 15, 6:30 PM · Business casual",
+    addr: "Clubhouse Terrace",
+    phone: ""
+  }, {
+    name: "Awards Dinner [PLACEHOLDER]",
+    detail: "Sep 16, 7:00 PM · Cocktail attire",
+    addr: "The Vineyard Room",
+    phone: ""
+  }],
+  dining: [{
+    name: "Clubhouse Grill",
+    detail: "Breakfast 6:30–10:30 · Lunch 11–3"
+  }, {
+    name: "The Turn Café",
+    detail: "All day · Coffee & light fare"
+  }]
+};
+const BENCHMARKS_SEED = [{
+  cat: "F&B",
+  metric: "F&B Cost of Sales %",
+  target: "30–35%",
+  industry: "32–38%",
+  formula: "F&B COS / F&B Revenue",
+  note: "Higher signals waste or pricing slippage."
+}, {
+  cat: "Membership",
+  metric: "Member Dues Renewal Rate",
+  target: "≥92%",
+  industry: "Varies",
+  formula: "Renewing members / Total renewable",
+  note: "Leading indicator of member satisfaction."
+}, {
+  cat: "Cash Flow",
+  metric: "Days to Close",
+  target: "≤5 business days",
+  industry: "Best-in-class ≤3",
+  formula: "Business days from period end to final close",
+  note: "Drives stewardship reputation."
+}, {
+  cat: "Capital",
+  metric: "Capital Reserve %",
+  target: "3–5% of revenue",
+  industry: "3–6%",
+  formula: "Capital reserve / Total revenue",
+  note: "Critical for asset preservation."
+}, {
+  cat: "Payroll",
+  metric: "Labor as % of Revenue",
+  target: "22–28%",
+  industry: "24–32%",
+  formula: "Total labor cost / Total revenue",
+  note: "Varies by club type and service model."
+}];
+const RESOURCES_SEED = [{
+  section: "Standards & Policies",
+  icon: "📘",
+  title: "CGP Chart of Accounts",
+  desc: "Master COA reference",
+  url: "#"
+}, {
+  section: "Standards & Policies",
+  icon: "🧾",
+  title: "Expense Reimbursement Policy",
+  desc: "Current corporate policy",
+  url: "#"
+}, {
+  section: "Tools & Templates",
+  icon: "📄",
+  title: "Monthly Operating Summary (MOS) Template",
+  desc: "Standard MOS workbook",
+  url: "#"
+}, {
+  section: "Tools & Templates",
+  icon: "🛠️",
+  title: "Capital Request Workflow",
+  desc: "Approval routing steps",
+  url: "#"
+}, {
+  section: "Training",
+  icon: "🎓",
+  title: "CMAA Accounting & Finance Path",
+  desc: "Certification roadmap",
+  url: "#"
+}, {
+  section: "External References",
+  icon: "🌐",
+  title: "Glossary of CGP Terms",
+  desc: "Internal terminology",
+  url: "#"
+}];
+const POLLS_SEED = {}; // polls created live by admin
+
+/* ============================================================
+   TABS DEFINITION
+   ============================================================ */
+const TABS = [{
+  key: "agenda",
+  icon: "📅",
+  label: "Agenda"
+}, {
+  key: "qa",
+  icon: "❓",
+  label: "Q&A"
+}, {
+  key: "polls",
+  icon: "📊",
+  label: "Polls"
+}, {
+  key: "benchmarks",
+  icon: "📈",
+  label: "Benchmarks"
+}, {
+  key: "takeaways",
+  icon: "💡",
+  label: "Takeaways"
+}, {
+  key: "shoutouts",
+  icon: "👏",
+  label: "Shoutouts"
+}, {
+  key: "photos",
+  icon: "📷",
+  label: "Photos"
+}, {
+  key: "resources",
+  icon: "📚",
+  label: "Resources"
+}];
+
+/* ============================================================
+   AGENDA TAB
+   ============================================================ */
+function AgendaTab({
+  display
+}) {
+  const [reactions, robj] = useNode("reactions");
+  const [view, setView] = useState(AGENDA[0].date);
+  const [expanded, setExpanded] = useState(null);
+  const today = new Date().toISOString().slice(0, 10);
+  const EMO = [["🔥", "fire"], ["👏", "applause"], ["💡", "insight"], ["🎯", "onpoint"]];
+  const cast = (eventKey, emoji) => {
+    const lk = "react_" + eventKey + "_" + emoji;
+    if (local.get(lk, false)) return;
+    const cur = robj[eventKey] && robj[eventKey][emoji] || 0;
+    store.update("reactions", eventKey, {
+      [emoji]: cur + 1
+    });
+    local.set(lk, true);
+  };
+  if (view === "venues") {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "wrap"
+    }, /*#__PURE__*/React.createElement("h2", {
+      className: "sectitle"
+    }, "Venues & Logistics"), /*#__PURE__*/React.createElement(Flag, null), /*#__PURE__*/React.createElement(AgendaDayPills, {
+      view: view,
+      setView: setView,
+      today: today
+    }), [["Conference Venues", "conference"], ["Evening Venues", "evening"], ["Dining Options", "dining"]].map(([h, k]) => /*#__PURE__*/React.createElement("div", {
+      key: k
+    }, /*#__PURE__*/React.createElement("h3", {
+      style: {
+        color: "var(--gold)",
+        margin: "14px 0 6px"
+      }
+    }, h), VENUES[k].map((v, i) => /*#__PURE__*/React.createElement("div", {
+      className: "card",
+      key: i
+    }, /*#__PURE__*/React.createElement("b", null, v.name), /*#__PURE__*/React.createElement("div", {
+      className: "meta"
+    }, v.detail), v.addr && /*#__PURE__*/React.createElement("div", {
+      className: "meta"
+    }, "\uD83D\uDCCD ", v.addr), v.phone && /*#__PURE__*/React.createElement("div", {
+      className: "meta"
+    }, "\uD83D\uDCDE ", /*#__PURE__*/React.createElement("a", {
+      href: "tel:" + v.phone
+    }, v.phone)))))));
+  }
+  const day = AGENDA.find(d => d.date === view);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle"
+  }, "Agenda"), /*#__PURE__*/React.createElement(Flag, null), /*#__PURE__*/React.createElement(AgendaDayPills, {
+    view: view,
+    setView: setView,
+    today: today
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginBottom: 10
+    }
+  }, day.title, " \xB7 ", day.location), day.events.map((ev, i) => {
+    const ek = day.date + "_" + ev.start;
+    const open = expanded === ek;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card",
+      key: ek,
+      onClick: () => setExpanded(open ? null : ek),
+      style: {
+        cursor: "pointer"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 22
+      }
+    }, ev.icon), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "meta tnum"
+    }, ev.start, "\u2013", ev.end), /*#__PURE__*/React.createElement("b", null, ev.name))), open && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 8
+      }
+    }, ev.desc), ev.speaker && /*#__PURE__*/React.createElement("div", {
+      className: "meta"
+    }, "Speaker: ", ev.speaker)), /*#__PURE__*/React.createElement("div", {
+      className: "row wrap2",
+      style: {
+        marginTop: 10,
+        gap: 6
+      },
+      onClick: e => e.stopPropagation()
+    }, EMO.map(([emoji, name]) => {
+      const c = robj[ek] && robj[ek][name] || 0;
+      const cast_ = local.get("react_" + ek + "_" + name, false);
+      return /*#__PURE__*/React.createElement("button", {
+        key: name,
+        className: "vote" + (cast_ ? " cast" : ""),
+        onClick: () => cast(ek, name)
+      }, emoji, " ", c > 0 ? c : "");
+    })));
+  }));
+}
+function AgendaDayPills({
+  view,
+  setView,
+  today
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "pillrow"
+  }, AGENDA.map(d => /*#__PURE__*/React.createElement("button", {
+    key: d.date,
+    className: "pill" + (view === d.date ? " active" : ""),
+    onClick: () => setView(d.date)
+  }, d.date === today && /*#__PURE__*/React.createElement("span", {
+    className: "live-dot"
+  }), d.label)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 1,
+      background: "var(--border)",
+      flex: "0 0 auto",
+      margin: "0 4px"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "pill" + (view === "venues" ? " active" : ""),
+    onClick: () => setView("venues")
+  }, "\uD83D\uDCCD Venues"));
+}
+
+/* ============================================================
+   Q&A TAB
+   ============================================================ */
 const QA_CATS = ["All", "Tax", "GAAP", "Audit", "Operations", "Systems", "Other"];
 function QATab({
   isAdmin
@@ -793,8 +1192,1487 @@ function QATab({
 }
 
 /* ============================================================
-   TEASER SHELL. Countdown + QR + title + a Questions link.
-   This is a limited share. It exposes only the Q&A feature.
+   POLLS TAB  (multiple-choice, numeric, knowledge-check, ranking, word-cloud)
+   ============================================================ */
+function PollsTab({
+  isAdmin
+}) {
+  const [list] = useNode("polls");
+  const [q, setQ] = useState("");
+  const [type, setType] = useState("mc");
+  const [opts, setOpts] = useState(["", ""]);
+  const [correct, setCorrect] = useState(0);
+  const create = () => {
+    if (!q.trim()) return;
+    const base = {
+      q: q.trim(),
+      type,
+      open: true,
+      votes: {},
+      casts: {}
+    };
+    if (type === "mc" || type === "kc" || type === "rank") {
+      base.options = opts.map(o => o.trim()).filter(Boolean);
+      if (base.options.length < 2) return;
+    }
+    if (type === "kc") base.correct = correct;
+    store.push("polls", base);
+    setQ("");
+    setOpts(["", ""]);
+    setCorrect(0);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle"
+  }, "Polls"), /*#__PURE__*/React.createElement("p", {
+    className: "secdesc"
+  }, "Live results, one vote per device."), isAdmin && /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "New poll (admin)"), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Poll question\u2026",
+    value: q,
+    onChange: e => setQ(e.target.value)
+  }), /*#__PURE__*/React.createElement("select", {
+    value: type,
+    onChange: e => setType(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "mc"
+  }, "Multiple choice"), /*#__PURE__*/React.createElement("option", {
+    value: "numeric"
+  }, "Numeric input (histogram)"), /*#__PURE__*/React.createElement("option", {
+    value: "kc"
+  }, "Knowledge check (graded)"), /*#__PURE__*/React.createElement("option", {
+    value: "rank"
+  }, "Ranking"), /*#__PURE__*/React.createElement("option", {
+    value: "word"
+  }, "Word cloud")), (type === "mc" || type === "kc" || type === "rank") && /*#__PURE__*/React.createElement("div", null, opts.map((o, i) => /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    key: i,
+    style: {
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Option " + (i + 1),
+    value: o,
+    onChange: e => {
+      const n = [...opts];
+      n[i] = e.target.value;
+      setOpts(n);
+    }
+  }), type === "kc" && /*#__PURE__*/React.createElement("button", {
+    className: "vote" + (correct === i ? " cast" : ""),
+    onClick: () => setCorrect(i),
+    title: "Mark correct"
+  }, "\u2713"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => setOpts([...opts, ""])
+  }, "+ Option")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: create
+  }, "Create Poll"))), list.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty"
+  }, "No polls yet."), [...list].reverse().map(p => /*#__PURE__*/React.createElement(PollCard, {
+    key: p._key,
+    p: p,
+    isAdmin: isAdmin
+  })));
+}
+function PollCard({
+  p,
+  isAdmin
+}) {
+  const lk = "pollcast_" + p._key;
+  const [done, setDone] = useState(local.get(lk, null));
+  const [num, setNum] = useState("");
+  const [word, setWord] = useState("");
+  const vote = optKey => {
+    if (done !== null || !p.open) return;
+    const cur = p.votes && p.votes[optKey] || 0;
+    store.update("polls", p._key, {
+      votes: {
+        ...(p.votes || {}),
+        [optKey]: cur + 1
+      }
+    });
+    local.set(lk, optKey);
+    setDone(optKey);
+  };
+  const submitNum = () => {
+    if (done !== null || num === "") return;
+    const v = Number(num);
+    const cur = p.votes && p.votes[v] || 0;
+    store.update("polls", p._key, {
+      votes: {
+        ...(p.votes || {}),
+        [v]: cur + 1
+      }
+    });
+    local.set(lk, v);
+    setDone(v);
+  };
+  const submitWord = () => {
+    if (done !== null || !word.trim()) return;
+    const w = word.trim().toLowerCase();
+    const cur = p.votes && p.votes[w] || 0;
+    store.update("polls", p._key, {
+      votes: {
+        ...(p.votes || {}),
+        [w]: cur + 1
+      }
+    });
+    local.set(lk, w);
+    setDone(w);
+  };
+  const total = Object.values(p.votes || {}).reduce((a, b) => a + b, 0);
+  const closed = !p.open;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("b", {
+    style: {
+      flex: 1
+    }
+  }, p.q), p.open ? /*#__PURE__*/React.createElement("span", {
+    className: "tag",
+    style: {
+      color: "var(--green-live)"
+    }
+  }, "\u25CF LIVE") : /*#__PURE__*/React.createElement("span", {
+    className: "tag"
+  }, "CLOSED")), (p.type === "mc" || p.type === "kc") && p.options.map((o, i) => {
+    const c = p.votes && p.votes[i] || 0;
+    const pc = total ? Math.round(c / total * 100) : 0;
+    const isCorrect = p.type === "kc" && closed && p.correct === i;
+    const chosen = done === i;
+    if (done === null && p.open) return /*#__PURE__*/React.createElement("button", {
+      key: i,
+      className: "btn-sm",
+      style: {
+        display: "block",
+        width: "100%",
+        marginBottom: 6,
+        textAlign: "left"
+      },
+      onClick: () => vote(i)
+    }, o);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "barwrap",
+      key: i,
+      style: isCorrect ? {
+        outline: "2px solid var(--green-live)"
+      } : null
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "bar",
+      style: {
+        width: pc + "%"
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "barlabel"
+    }, chosen ? "✓ " : "", o, isCorrect ? " ✔" : ""), /*#__PURE__*/React.createElement("span", {
+      className: "barpct"
+    }, pc, "% (", c, ")"));
+  }), p.type === "numeric" && (done === null && p.open ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    inputMode: "decimal",
+    placeholder: "Your number",
+    value: num,
+    onChange: e => setNum(e.target.value),
+    style: {
+      margin: 0
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: submitNum
+  }, "Submit")) : /*#__PURE__*/React.createElement(Histogram, {
+    votes: p.votes,
+    mine: done
+  })), p.type === "word" && (done === null && p.open ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "One word\u2026",
+    value: word,
+    onChange: e => setWord(e.target.value),
+    style: {
+      margin: 0
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: submitWord
+  }, "Submit")) : /*#__PURE__*/React.createElement(WordCloud, {
+    votes: p.votes
+  })), p.type === "rank" && /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 6
+    }
+  }, "Ranking poll. Drag-and-drop UI is a later pass. Options: ", p.options.join(", "), "."), /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 8
+    }
+  }, total, " response", total === 1 ? "" : "s"), isAdmin && /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginTop: 8,
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => store.update("polls", p._key, {
+      open: !p.open
+    })
+  }, p.open ? "Close" : "Reopen"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-danger",
+    onClick: () => store.remove("polls", p._key)
+  }, "Delete")));
+}
+function Histogram({
+  votes,
+  mine
+}) {
+  const entries = Object.entries(votes || {}).map(([k, v]) => [Number(k), v]).sort((a, b) => a[0] - b[0]);
+  const max = Math.max(1, ...entries.map(e => e[1]));
+  if (!entries.length) return /*#__PURE__*/React.createElement("div", {
+    className: "meta"
+  }, "No responses yet.");
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, entries.map(([k, v]) => /*#__PURE__*/React.createElement("div", {
+    className: "barwrap",
+    key: k,
+    style: k === mine ? {
+      outline: "2px solid var(--gold)"
+    } : null
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bar",
+    style: {
+      width: v / max * 100 + "%"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "barlabel tnum"
+  }, k), /*#__PURE__*/React.createElement("span", {
+    className: "barpct"
+  }, v))));
+}
+function WordCloud({
+  votes
+}) {
+  const entries = Object.entries(votes || {}).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...entries.map(e => e[1]));
+  if (!entries.length) return /*#__PURE__*/React.createElement("div", {
+    className: "meta"
+  }, "No words yet.");
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 8,
+      marginTop: 10,
+      alignItems: "center"
+    }
+  }, entries.map(([w, c]) => /*#__PURE__*/React.createElement("span", {
+    key: w,
+    style: {
+      fontSize: 13 + c / max * 22 + "px",
+      color: "var(--gold)",
+      fontWeight: 700
+    }
+  }, w)));
+}
+
+/* ============================================================
+   CASE STUDIES TAB  (audit-style 1-5 scoring)
+   ============================================================ */
+
+/* ============================================================
+   BENCHMARKS TAB  (admin CRUD + compare-to-my-club)
+   ============================================================ */
+const BM_CATS = ["All", "Revenue", "Payroll", "F&B", "Golf", "G&A", "Cash Flow", "Membership", "Capital"];
+function BenchmarksTab({
+  isAdmin
+}) {
+  const [list] = useNode("benchmarks");
+  useEffect(() => {
+    if (!store.isLoaded("benchmarks")) return; // wait for first Firebase snapshot
+    if (list.length === 0 && !local.get("seeded_benchmarks", false)) {
+      BENCHMARKS_SEED.forEach(b => store.push("benchmarks", b));
+      local.set("seeded_benchmarks", true);
+    }
+  }, [list]);
+  const [cat, setCat] = useState("All");
+  const [search, setSearch] = useState("");
+  const [draft, setDraft] = useState(null);
+  let rows = list.filter(b => cat === "All" || b.cat === cat);
+  if (search.trim()) {
+    const s = search.toLowerCase();
+    rows = rows.filter(b => (b.metric + b.note + b.formula).toLowerCase().includes(s));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle"
+  }, "Benchmarks"), /*#__PURE__*/React.createElement("p", {
+    className: "secdesc"
+  }, "CGP standards and targets. Pull these up anytime."), /*#__PURE__*/React.createElement(Flag, null), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Search benchmarks\u2026",
+    value: search,
+    onChange: e => setSearch(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "pillrow"
+  }, BM_CATS.map(c => /*#__PURE__*/React.createElement("button", {
+    key: c,
+    className: "pill" + (cat === c ? " active" : ""),
+    onClick: () => setCat(c)
+  }, c))), isAdmin && /*#__PURE__*/React.createElement("div", {
+    className: "card admin-sec"
+  }, draft ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Metric name",
+    value: draft.metric,
+    onChange: e => setDraft({
+      ...draft,
+      metric: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "CGP target",
+    value: draft.target,
+    onChange: e => setDraft({
+      ...draft,
+      target: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Industry",
+    value: draft.industry,
+    onChange: e => setDraft({
+      ...draft,
+      industry: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Formula",
+    value: draft.formula,
+    onChange: e => setDraft({
+      ...draft,
+      formula: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Interpretation note",
+    value: draft.note,
+    onChange: e => setDraft({
+      ...draft,
+      note: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("select", {
+    value: draft.cat,
+    onChange: e => setDraft({
+      ...draft,
+      cat: e.target.value
+    })
+  }, BM_CATS.slice(1).map(c => /*#__PURE__*/React.createElement("option", {
+    key: c
+  }, c))), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: () => {
+      store.push("benchmarks", draft);
+      setDraft(null);
+    }
+  }, "Save"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => setDraft(null)
+  }, "Cancel"))) : /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => setDraft({
+      cat: "Revenue",
+      metric: "",
+      target: "",
+      industry: "",
+      formula: "",
+      note: ""
+    })
+  }, "+ Add benchmark")), rows.map(b => /*#__PURE__*/React.createElement(BenchmarkCard, {
+    key: b._key,
+    b: b,
+    isAdmin: isAdmin
+  })));
+}
+function BenchmarkCard({
+  b,
+  isAdmin
+}) {
+  const [mine, setMine] = useState("");
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("b", null, b.metric), /*#__PURE__*/React.createElement("span", {
+    className: "tag"
+  }, b.cat)), /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 6
+    }
+  }, "CGP target: ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--gold)"
+    }
+  }, b.target), " \xB7 Industry: ", b.industry), /*#__PURE__*/React.createElement("div", {
+    className: "mono meta",
+    style: {
+      marginTop: 4
+    }
+  }, b.formula), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6
+    }
+  }, b.note), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Compare to my club\u2026",
+    value: mine,
+    onChange: e => setMine(e.target.value),
+    style: {
+      margin: 0
+    }
+  })), mine && /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 4
+    }
+  }, "Your value: ", /*#__PURE__*/React.createElement("b", null, mine), " vs CGP target ", b.target, "."), isAdmin && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-danger",
+    onClick: () => store.remove("benchmarks", b._key)
+  }, "Delete")));
+}
+
+/* ============================================================
+   CALCULATORS TAB  (6 tools)
+   ============================================================ */
+function num(v) {
+  return Number(v) || 0;
+}
+function CalcCard({
+  title,
+  children,
+  explainer
+}) {
+  const [open, setOpen] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--gold)"
+    }
+  }, title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, children), /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 8,
+      cursor: "pointer"
+    },
+    onClick: () => setOpen(!open)
+  }, "How this is used ", open ? "▲" : "▼"), open && /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 6
+    }
+  }, explainer));
+}
+function Out({
+  label,
+  val
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "space-between",
+      borderTop: "1px solid var(--border)",
+      paddingTop: 6,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "meta"
+  }, label), /*#__PURE__*/React.createElement("b", {
+    className: "tnum",
+    style: {
+      color: "var(--gold)"
+    }
+  }, val));
+}
+function CalculatorsTab({
+  onBack
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, onBack && /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: onBack
+  }, "\u2190 Resources"), /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle",
+    style: {
+      marginTop: 10
+    }
+  }, "Calculators"), /*#__PURE__*/React.createElement("p", {
+    className: "secdesc"
+  }, "Focused tools for mid-session math."), /*#__PURE__*/React.createElement(Breakeven, null), /*#__PURE__*/React.createElement(FlexVariance, null), /*#__PURE__*/React.createElement(DuesModel, null), /*#__PURE__*/React.createElement(CapexROI, null), /*#__PURE__*/React.createElement(LaborSensitivity, null), /*#__PURE__*/React.createElement(CashRunway, null));
+}
+function Breakeven() {
+  const [fc, setFc] = useState(""),
+    [vc, setVc] = useState(""),
+    [price, setPrice] = useState("");
+  const cm = num(price) * (1 - num(vc) / 100);
+  const units = cm > 0 ? Math.ceil(num(fc) / cm) : 0;
+  return /*#__PURE__*/React.createElement(CalcCard, {
+    title: "Breakeven Point",
+    explainer: "Fixed costs / contribution margin per unit. Example: $50,000 fixed, 40% variable cost, $25 price = CM $15, breakeven 3,334 units."
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Fixed costs ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: fc,
+    onChange: e => setFc(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Variable cost (% of price)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: vc,
+    onChange: e => setVc(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Average price ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: price,
+    onChange: e => setPrice(e.target.value)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Contribution margin / unit",
+    val: money(cm)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Units to breakeven",
+    val: units.toLocaleString()
+  }));
+}
+function FlexVariance() {
+  const [budRev, setBR] = useState(""),
+    [actRev, setAR] = useState(""),
+    [fixed, setF] = useState(""),
+    [varPct, setVP] = useState("");
+  const flexExp = num(fixed) + num(actRev) * (num(varPct) / 100);
+  const budExp = num(fixed) + num(budRev) * (num(varPct) / 100);
+  const varc = budExp - flexExp;
+  return /*#__PURE__*/React.createElement(CalcCard, {
+    title: "Flex Variance Analyzer",
+    explainer: "Flexes the variable portion of budgeted expense to actual revenue, then compares. A negative variance means expenses ran higher than the flexed budget allowed."
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Budgeted revenue ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: budRev,
+    onChange: e => setBR(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Actual revenue ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: actRev,
+    onChange: e => setAR(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Fixed costs ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: fixed,
+    onChange: e => setF(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Variable cost (% of revenue)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: varPct,
+    onChange: e => setVP(e.target.value)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Flexed expense (at actual rev)",
+    val: money(flexExp)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Budgeted expense",
+    val: money(budExp)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Variance",
+    val: money(varc)
+  }));
+}
+function DuesModel() {
+  const [count, setC] = useState(""),
+    [attr, setA] = useState(""),
+    [dues, setD] = useState(""),
+    [newM, setN] = useState("");
+  const retained = num(count) * (1 - num(attr) / 100);
+  const endCount = retained + num(newM);
+  const annual = endCount * num(dues);
+  return /*#__PURE__*/React.createElement(CalcCard, {
+    title: "Member Dues Modeling",
+    explainer: "Projects annual dues from current members, attrition, average dues, and projected new joins. Example: 400 members, 8% attrition, $6,000 dues, 30 new = $2.4M."
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Current member count"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: count,
+    onChange: e => setC(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Annual attrition (%)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: attr,
+    onChange: e => setA(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Average annual dues ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: dues,
+    onChange: e => setD(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Projected new members"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: newM,
+    onChange: e => setN(e.target.value)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Projected year-end members",
+    val: Math.round(endCount).toLocaleString()
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Projected annual dues",
+    val: money(annual)
+  }));
+}
+function CapexROI() {
+  const [cost, setC] = useState(""),
+    [inflow, setI] = useState(""),
+    [rate, setR] = useState(""),
+    [life, setL] = useState("");
+  const r = num(rate) / 100,
+    n = Math.max(0, Math.floor(num(life)));
+  let npv = -num(cost);
+  for (let t = 1; t <= n; t++) npv += num(inflow) / Math.pow(1 + r, t);
+  // simple IRR via bisection
+  const irr = (() => {
+    if (n === 0 || num(inflow) <= 0) return null;
+    let lo = -0.9,
+      hi = 2;
+    const f = x => {
+      let v = -num(cost);
+      for (let t = 1; t <= n; t++) v += num(inflow) / Math.pow(1 + x, t);
+      return v;
+    };
+    if (f(lo) * f(hi) > 0) return null;
+    for (let i = 0; i < 60; i++) {
+      const mid = (lo + hi) / 2;
+      if (f(mid) > 0) lo = mid;else hi = mid;
+    }
+    return (lo + hi) / 2;
+  })();
+  return /*#__PURE__*/React.createElement(CalcCard, {
+    title: "Capital Investment ROI",
+    explainer: "NPV discounts each year's cash inflow back to today and subtracts the project cost. IRR is the discount rate that makes NPV zero. Positive NPV clears the hurdle."
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Project cost ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: cost,
+    onChange: e => setC(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Annual cash inflow ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: inflow,
+    onChange: e => setI(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Discount rate (%)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: rate,
+    onChange: e => setR(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Useful life (years)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: life,
+    onChange: e => setL(e.target.value)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "NPV",
+    val: money(npv)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "IRR",
+    val: irr === null ? "-" : pct(irr * 100)
+  }));
+}
+function LaborSensitivity() {
+  const [payroll, setP] = useState(""),
+    [rev, setR] = useState(""),
+    [target, setT] = useState("");
+  const curRatio = num(rev) ? num(payroll) / num(rev) * 100 : 0;
+  const targetPay = num(rev) * (num(target) / 100);
+  const adjust = num(payroll) - targetPay;
+  return /*#__PURE__*/React.createElement(CalcCard, {
+    title: "Labor Cost Sensitivity",
+    explainer: "Shows current labor ratio and the payroll dollars to add or cut to hit a target ratio. A positive adjustment means payroll must come down."
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Current payroll ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: payroll,
+    onChange: e => setP(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Revenue ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: rev,
+    onChange: e => setR(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Target labor ratio (%)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: target,
+    onChange: e => setT(e.target.value)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Current labor ratio",
+    val: pct(curRatio)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Payroll at target",
+    val: money(targetPay)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Adjustment needed",
+    val: money(adjust)
+  }));
+}
+function CashRunway() {
+  const [cash, setC] = useState(""),
+    [burn, setB] = useState(""),
+    [receipts, setR] = useState("");
+  const net = num(burn) - num(receipts);
+  const months = net > 0 ? num(cash) / net : Infinity;
+  return /*#__PURE__*/React.createElement(CalcCard, {
+    title: "Cash Flow Runway",
+    explainer: "Months of runway = cash on hand divided by net monthly burn (burn minus expected receipts). If receipts cover burn, runway is effectively unlimited."
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Current cash ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: cash,
+    onChange: e => setC(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Monthly burn ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: burn,
+    onChange: e => setB(e.target.value)
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "fld"
+  }, "Expected monthly receipts ($)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: receipts,
+    onChange: e => setR(e.target.value)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Net monthly burn",
+    val: money(net)
+  }), /*#__PURE__*/React.createElement(Out, {
+    label: "Runway",
+    val: months === Infinity ? "∞ (cash-positive)" : months.toFixed(1) + " months"
+  }));
+}
+
+/* ============================================================
+   TAKEAWAYS TAB
+   ============================================================ */
+function TakeawaysTab({
+  isAdmin
+}) {
+  const [list] = useNode("takeaways");
+  const [name, setName] = useState(""),
+    [text, setText] = useState(""),
+    [filter, setFilter] = useState("All");
+  const today = new Date().toISOString().slice(0, 10);
+  const dayLabel = (AGENDA.find(d => d.date === today) || {}).label || "Day 1";
+  const post = () => {
+    if (!text.trim()) return;
+    store.push("takeaways", {
+      name: name.trim(),
+      text: text.trim(),
+      day: dayLabel,
+      pinned: false
+    });
+    setText("");
+  };
+  let rows = list.filter(t => filter === "All" || t.day === filter).reverse();
+  rows = rows.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle"
+  }, "Takeaways"), /*#__PURE__*/React.createElement("p", {
+    className: "secdesc"
+  }, "Capture what lands. Tagged to the day automatically."), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Your name (optional)",
+    value: name,
+    onChange: e => setName(e.target.value)
+  }), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: "What's your takeaway?",
+    value: text,
+    onChange: e => setText(e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: post
+  }, "Post")), /*#__PURE__*/React.createElement("div", {
+    className: "pillrow"
+  }, ["All", "Day 1", "Day 2", "Day 3"].map(d => /*#__PURE__*/React.createElement("button", {
+    key: d,
+    className: "pill" + (filter === d ? " active" : ""),
+    onClick: () => setFilter(d)
+  }, d))), rows.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty"
+  }, "No takeaways yet."), rows.map(t => /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    key: t._key
+  }, t.pinned && /*#__PURE__*/React.createElement("span", {
+    className: "tag",
+    style: {
+      marginBottom: 6,
+      display: "inline-block"
+    }
+  }, "\uD83D\uDCCC Pinned"), /*#__PURE__*/React.createElement("div", null, t.text), /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tag"
+  }, t.day), " ", t.name || "Anonymous", " \xB7 ", ago(t.ts)), isAdmin && /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginTop: 8,
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => store.update("takeaways", t._key, {
+      pinned: !t.pinned
+    })
+  }, t.pinned ? "Unpin" : "Pin"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-danger",
+    onClick: () => store.remove("takeaways", t._key)
+  }, "Delete")))), isAdmin && rows.length > 0 && /*#__PURE__*/React.createElement(ExportMd, {
+    list: list
+  }));
+}
+function ExportMd({
+  list
+}) {
+  const exp = () => {
+    let md = "# CGP Accounting Meeting Takeaways\n\n";
+    list.forEach(t => {
+      md += "- **" + (t.name || "Anonymous") + "** (" + t.day + "): " + t.text + "\n";
+    });
+    const blob = new Blob([md], {
+      type: "text/markdown"
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "takeaways.md";
+    a.click();
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card admin-sec"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: exp
+  }, "\uD83D\uDCE5 Export board (Markdown)"));
+}
+
+/* ============================================================
+   SHOUTOUTS TAB
+   ============================================================ */
+function ShoutoutsTab({
+  isAdmin
+}) {
+  const [list] = useNode("shoutouts");
+  const [from, setFrom] = useState(""),
+    [to, setTo] = useState(""),
+    [msg, setMsg] = useState("");
+  const post = () => {
+    if (!to.trim() || !msg.trim()) return;
+    store.push("shoutouts", {
+      from: from.trim(),
+      to: to.trim(),
+      msg: msg.trim(),
+      pinned: false
+    });
+    setTo("");
+    setMsg("");
+  };
+  let rows = [...list].reverse().sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle"
+  }, "Shoutouts"), /*#__PURE__*/React.createElement("p", {
+    className: "secdesc"
+  }, "Recognize good work. Keep it public, keep it kind."), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "From (optional)",
+    value: from,
+    onChange: e => setFrom(e.target.value)
+  }), /*#__PURE__*/React.createElement("input", {
+    placeholder: "To",
+    value: to,
+    onChange: e => setTo(e.target.value)
+  }), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: "Your message\u2026",
+    value: msg,
+    onChange: e => setMsg(e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: post
+  }, "Post")), rows.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty"
+  }, "No shoutouts yet."), rows.map(s => /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    key: s._key
+  }, s.pinned && /*#__PURE__*/React.createElement("span", {
+    className: "tag",
+    style: {
+      marginBottom: 6,
+      display: "inline-block"
+    }
+  }, "\uD83D\uDCCC Pinned"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--gold)"
+    }
+  }, s.from || "Someone"), " \u2192 ", /*#__PURE__*/React.createElement("b", null, s.to)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4
+    }
+  }, s.msg), /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 4
+    }
+  }, ago(s.ts)), isAdmin && /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginTop: 8,
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => store.update("shoutouts", s._key, {
+      pinned: !s.pinned
+    })
+  }, s.pinned ? "Unpin" : "Pin"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-danger",
+    onClick: () => store.remove("shoutouts", s._key)
+  }, "Delete")))));
+}
+
+/* ============================================================
+   PHOTOS TAB  (client-side compress, base64 in store)
+   ============================================================ */
+function PhotosTab({
+  isAdmin
+}) {
+  const [list] = useNode("photos");
+  const [name, setName] = useState(""),
+    [cap, setCap] = useState(""),
+    [lightbox, setLightbox] = useState(null);
+  const fileRef = useRef();
+  const handleFile = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 800,
+          scale = Math.min(1, max / Math.max(img.width, img.height));
+        const cv = document.createElement("canvas");
+        cv.width = img.width * scale;
+        cv.height = img.height * scale;
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        const data = cv.toDataURL("image/jpeg", 0.7);
+        store.push("photos", {
+          name: name.trim(),
+          cap: cap.trim(),
+          data,
+          likes: 0
+        });
+        setCap("");
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(f);
+  };
+  const like = p => {
+    if (local.get("plike_" + p._key, false)) return;
+    store.update("photos", p._key, {
+      likes: (p.likes || 0) + 1
+    });
+    local.set("plike_" + p._key, true);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle"
+  }, "Photos"), /*#__PURE__*/React.createElement("p", {
+    className: "secdesc"
+  }, "Share the moments. Compressed on-device before upload."), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Your name (optional)",
+    value: name,
+    onChange: e => setName(e.target.value)
+  }), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Caption (optional)",
+    value: cap,
+    onChange: e => setCap(e.target.value)
+  }), /*#__PURE__*/React.createElement("input", {
+    ref: fileRef,
+    type: "file",
+    accept: "image/*",
+    capture: "environment",
+    style: {
+      display: "none"
+    },
+    onChange: handleFile
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: () => {
+      fileRef.current.removeAttribute("capture");
+      fileRef.current.click();
+    }
+  }, "\uD83D\uDDBC\uFE0F Choose"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => {
+      fileRef.current.setAttribute("capture", "environment");
+      fileRef.current.click();
+    }
+  }, "\uD83D\uDCF7 Camera"))), list.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty"
+  }, "No photos yet."), /*#__PURE__*/React.createElement("div", {
+    className: "photo-grid"
+  }, [...list].reverse().map(p => /*#__PURE__*/React.createElement("div", {
+    key: p._key,
+    style: {
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("img", {
+    src: p.data,
+    alt: p.cap,
+    onClick: () => setLightbox(p)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "vote" + (local.get("plike_" + p._key, false) ? " cast" : ""),
+    style: {
+      position: "absolute",
+      bottom: 4,
+      right: 4,
+      padding: "2px 7px",
+      fontSize: 12,
+      minWidth: 0
+    },
+    onClick: () => like(p)
+  }, "\u2665 ", p.likes || 0)))), lightbox && /*#__PURE__*/React.createElement("div", {
+    className: "overlay",
+    onClick: () => setLightbox(null)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("img", {
+    src: lightbox.data,
+    style: {
+      width: "100%",
+      borderRadius: 8
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, lightbox.cap), /*#__PURE__*/React.createElement("div", {
+    className: "meta"
+  }, lightbox.name || "Anonymous", " \xB7 ", ago(lightbox.ts)), isAdmin && /*#__PURE__*/React.createElement("button", {
+    className: "btn-danger",
+    style: {
+      marginTop: 8
+    },
+    onClick: () => {
+      store.remove("photos", lightbox._key);
+      setLightbox(null);
+    }
+  }, "Delete"))));
+}
+
+/* ============================================================
+   RESOURCES TAB  (admin CRUD)
+   ============================================================ */
+const RES_SECTIONS = ["Standards & Policies", "Tools & Templates", "Training", "External References"];
+function ResourcesTab({
+  isAdmin,
+  onOpenCalculators
+}) {
+  const [list] = useNode("resources");
+  useEffect(() => {
+    if (!store.isLoaded("resources")) return;
+    if (list.length === 0 && !local.get("seeded_resources", false)) {
+      RESOURCES_SEED.forEach(r => store.push("resources", r));
+      local.set("seeded_resources", true);
+    }
+  }, [list]);
+  const [draft, setDraft] = useState(null);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "sectitle"
+  }, "Resources"), /*#__PURE__*/React.createElement("p", {
+    className: "secdesc"
+  }, "Reference docs and learning links."), /*#__PURE__*/React.createElement(Flag, null), /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      cursor: "pointer",
+      borderColor: "var(--gold-dim)"
+    },
+    onClick: onOpenCalculators
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20,
+      marginRight: 8
+    }
+  }, "\uD83E\uDDEE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--gold)"
+    }
+  }, "Financial Calculators"), /*#__PURE__*/React.createElement("div", {
+    className: "meta"
+  }, "Breakeven, flex variance, dues, ROI, labor sensitivity, cash runway. Tap to open.")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--gold)"
+    }
+  }, "\u2192"))), isAdmin && /*#__PURE__*/React.createElement("div", {
+    className: "card admin-sec"
+  }, draft ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Title",
+    value: draft.title,
+    onChange: e => setDraft({
+      ...draft,
+      title: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Description",
+    value: draft.desc,
+    onChange: e => setDraft({
+      ...draft,
+      desc: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("input", {
+    placeholder: "URL",
+    value: draft.url,
+    onChange: e => setDraft({
+      ...draft,
+      url: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("select", {
+    value: draft.section,
+    onChange: e => setDraft({
+      ...draft,
+      section: e.target.value
+    })
+  }, RES_SECTIONS.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s
+  }, s))), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: () => {
+      store.push("resources", {
+        ...draft,
+        icon: "🔗"
+      });
+      setDraft(null);
+    }
+  }, "Save"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => setDraft(null)
+  }, "Cancel"))) : /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => setDraft({
+      section: RES_SECTIONS[0],
+      title: "",
+      desc: "",
+      url: "#"
+    })
+  }, "+ Add resource")), RES_SECTIONS.map(sec => {
+    const rows = list.filter(r => r.section === sec);
+    if (!rows.length) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: sec
+    }, /*#__PURE__*/React.createElement("h3", {
+      style: {
+        color: "var(--gold)",
+        margin: "14px 0 6px"
+      }
+    }, sec), rows.map(r => /*#__PURE__*/React.createElement("div", {
+      className: "card",
+      key: r._key,
+      style: {
+        padding: "10px 14px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row"
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 20,
+        marginRight: 8
+      }
+    }, r.icon || "🔗"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("a", {
+      href: r.url,
+      target: "_blank"
+    }, /*#__PURE__*/React.createElement("b", null, r.title)), /*#__PURE__*/React.createElement("div", {
+      className: "meta"
+    }, r.desc)), isAdmin && /*#__PURE__*/React.createElement("button", {
+      className: "btn-danger",
+      onClick: () => store.remove("resources", r._key)
+    }, "\u2715")))));
+  }));
+}
+
+/* ============================================================
+   LEADERBOARD TAB
+   ============================================================ */
+
+/* ============================================================
+   CPE CREDIT TAB
+   ============================================================ */
+
+/* ============================================================
+   ADMIN MODAL
+   ============================================================ */
+const RESET_NODES = [["questions", "Q&A"], ["polls", "Polls"], ["photos", "Photos"], ["takeaways", "Takeaways"], ["shoutouts", "Shoutouts"], ["reactions", "Agenda reactions"], ["benchmarks", "Benchmarks"], ["resources", "Resources"]];
+function AdminModal({
+  onClose,
+  visibility,
+  setVisibility,
+  live,
+  setLive
+}) {
+  const [ann, setAnn] = useState("");
+  const postAnn = () => {
+    if (!ann.trim()) return;
+    store.setNode("announcement", {
+      text: ann.trim(),
+      ts: Date.now()
+    });
+    setAnn("");
+    alert("Announcement posted.");
+  };
+  const resetNode = (node, label) => {
+    if (confirm("Reset " + label + "? This clears all " + label + " data and cannot be undone.")) store.clearNode(node);
+  };
+  const clearLocal = () => {
+    if (confirm("Clear this device's local state (votes, team, etc.)?")) {
+      local.clearAll();
+      alert("Local state cleared. Reload to see attendee flow fresh.");
+    }
+  };
+  const nuke = () => {
+    if (confirm("⚠️ Reset ALL data? Wipes every feature.") && confirm("Are you absolutely sure? This cannot be undone.")) {
+      RESET_NODES.forEach(([n]) => store.clearNode(n));
+      store.clearNode("announcement");
+      local.clearAll();
+      alert("All data wiped.");
+    }
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "overlay",
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("h2", null, "\uD83D\uDD12 Admin Panel"), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn",
+    onClick: onClose
+  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
+    className: "admin-sec"
+  }, /*#__PURE__*/React.createElement("b", null, "Mode"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "toggle" + (live ? " on" : ""),
+    onClick: () => setLive(!live)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "knob"
+  })), /*#__PURE__*/React.createElement("span", null, live ? "LIVE mode" : "TEST mode")), /*#__PURE__*/React.createElement("div", {
+    className: "meta",
+    style: {
+      marginTop: 4
+    }
+  }, "Test mode shows a banner so you don't confuse it with the real event.")), /*#__PURE__*/React.createElement("div", {
+    className: "admin-sec"
+  }, /*#__PURE__*/React.createElement("b", null, "Post announcement"), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: "Banner message to all devices\u2026",
+    value: ann,
+    onChange: e => setAnn(e.target.value),
+    style: {
+      marginTop: 6
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: postAnn
+  }, "Send"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: () => store.clearNode("announcement")
+  }, "Clear banner"))), /*#__PURE__*/React.createElement("div", {
+    className: "admin-sec"
+  }, /*#__PURE__*/React.createElement("b", null, "Feature visibility"), TABS.map(t => /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    key: t.key,
+    style: {
+      justifyContent: "space-between",
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", null, t.icon, " ", t.label), /*#__PURE__*/React.createElement("div", {
+    className: "toggle" + (visibility[t.key] !== false ? " on" : ""),
+    onClick: () => setVisibility({
+      ...visibility,
+      [t.key]: visibility[t.key] === false
+    })
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "knob"
+  }))))), /*#__PURE__*/React.createElement("div", {
+    className: "admin-sec"
+  }, /*#__PURE__*/React.createElement("b", null, "Reset data by section"), /*#__PURE__*/React.createElement("div", {
+    className: "row wrap2",
+    style: {
+      gap: 6,
+      marginTop: 6
+    }
+  }, RESET_NODES.map(([n, l]) => /*#__PURE__*/React.createElement("button", {
+    key: n,
+    className: "btn-sm",
+    onClick: () => resetNode(n, l)
+  }, l)))), /*#__PURE__*/React.createElement("div", {
+    className: "admin-sec"
+  }, /*#__PURE__*/React.createElement("b", null, "Device & global"), /*#__PURE__*/React.createElement("div", {
+    className: "row wrap2",
+    style: {
+      gap: 6,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-sm",
+    onClick: clearLocal
+  }, "Clear my local state"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-danger",
+    onClick: nuke
+  }, "\u26A0\uFE0F Reset ALL data")))));
+}
+function PinPrompt({
+  onClose,
+  onUnlock
+}) {
+  const [pin, setPin] = useState("");
+  const submit = () => {
+    if (pin === EVENT.pin) onUnlock();else {
+      alert("Wrong PIN.");
+      setPin("");
+    }
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "overlay",
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    onClick: e => e.stopPropagation(),
+    style: {
+      maxWidth: 340
+    }
+  }, /*#__PURE__*/React.createElement("h2", null, "Admin access"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    inputMode: "numeric",
+    placeholder: "4-digit PIN",
+    value: pin,
+    onChange: e => setPin(e.target.value),
+    onKeyDown: e => e.key === "Enter" && submit()
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn-gold",
+    onClick: submit
+  }, "Unlock")));
+}
+
+/* ============================================================
+   WELCOME SCREEN
    ============================================================ */
 function Logo() {
   return /*#__PURE__*/React.createElement("svg", {
@@ -829,8 +2707,8 @@ function Logo() {
     letterSpacing: "7"
   }, "GOLF PARTNERS"));
 }
-function TeaserWelcome({
-  onAsk
+function Welcome({
+  onEnter
 }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
@@ -864,32 +2742,84 @@ function TeaserWelcome({
       fontSize: 18,
       padding: "12px 28px"
     },
-    onClick: onAsk
-  }, "Questions")), /*#__PURE__*/React.createElement("div", {
+    onClick: onEnter
+  }, "Enter the Wall")), /*#__PURE__*/React.createElement("div", {
     className: "meta",
     style: {
       marginTop: 14
     }
   }, "Tell us what's on your mind. Submit your questions now, and we'll be sure to address them at the meeting."));
 }
-function TeaserApp() {
-  const [view, setView] = useState("welcome");
+
+/* ============================================================
+   ROOT APP
+   ============================================================ */
+function App() {
+  const [entered, setEntered] = useState(false);
+  const [tab, setTab] = useState("agenda");
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPin, setShowPin] = useState(false);
-  const [pin, setPin] = useState("");
-  const submitPin = () => {
-    if (pin === EVENT.pin) {
-      setIsAdmin(true);
-      setShowPin(false);
-      setPin("");
-    } else {
-      alert("Wrong PIN.");
-      setPin("");
-    }
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [display, setDisplay] = useState(false);
+  const [visibility, setVisibility] = useState(local.get("admin_visibility", {}));
+  const [live, setLive] = useState(local.get("admin_live", false));
+  const [ann, setAnnObj] = useState({});
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  useEffect(() => store.subscribe("announcement", setAnnObj), []);
+  useEffect(() => {
+    local.set("admin_visibility", visibility);
+  }, [visibility]);
+  useEffect(() => {
+    local.set("admin_live", live);
+  }, [live]);
+  useEffect(() => {
+    document.body.classList.toggle("display-mode", display);
+  }, [display]);
+
+  // live badge counts
+  const [qCount] = useNode("questions");
+  const [pCount] = useNode("polls");
+  const counts = {
+    qa: qCount.filter(q => !q.answered).length,
+    polls: pCount.filter(p => p.open).length
   };
-  if (view === "welcome") return /*#__PURE__*/React.createElement(TeaserWelcome, {
-    onAsk: () => setView("qa")
+  const gearClick = () => {
+    if (isAdmin) setShowAdmin(true);else setShowPin(true);
+  };
+  const visibleTabs = TABS.filter(t => isAdmin ? true : visibility[t.key] !== false);
+  if (!entered) return /*#__PURE__*/React.createElement(Welcome, {
+    onEnter: () => setEntered(true)
   });
+  const TabComp = {
+    agenda: /*#__PURE__*/React.createElement(AgendaTab, {
+      display: display
+    }),
+    qa: /*#__PURE__*/React.createElement(QATab, {
+      isAdmin: isAdmin
+    }),
+    polls: /*#__PURE__*/React.createElement(PollsTab, {
+      isAdmin: isAdmin
+    }),
+    benchmarks: /*#__PURE__*/React.createElement(BenchmarksTab, {
+      isAdmin: isAdmin
+    }),
+    calculators: /*#__PURE__*/React.createElement(CalculatorsTab, {
+      onBack: () => setTab("resources")
+    }),
+    takeaways: /*#__PURE__*/React.createElement(TakeawaysTab, {
+      isAdmin: isAdmin
+    }),
+    shoutouts: /*#__PURE__*/React.createElement(ShoutoutsTab, {
+      isAdmin: isAdmin
+    }),
+    photos: /*#__PURE__*/React.createElement(PhotosTab, {
+      isAdmin: isAdmin
+    }),
+    resources: /*#__PURE__*/React.createElement(ResourcesTab, {
+      isAdmin: isAdmin,
+      onOpenCalculators: () => setTab("calculators")
+    })
+  }[tab];
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "header"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -898,51 +2828,50 @@ function TeaserApp() {
     className: "ttl"
   }, EVENT.shortName)), /*#__PURE__*/React.createElement("div", {
     className: "spacer"
-  }), isAdmin && /*#__PURE__*/React.createElement("span", {
+  }), isAdmin && !live && /*#__PURE__*/React.createElement("span", {
     className: "tag",
     style: {
-      color: "var(--gold)",
-      borderColor: "var(--gold-dim)"
+      color: "var(--danger)",
+      borderColor: "var(--danger)"
     }
-  }, "ADMIN"), /*#__PURE__*/React.createElement("button", {
-    className: "iconbtn",
-    title: "Back",
-    onClick: () => setView("welcome")
-  }, "\u2190"), /*#__PURE__*/React.createElement("button", {
+  }, "TEST"), /*#__PURE__*/React.createElement("button", {
+    className: "iconbtn" + (display ? " active" : ""),
+    title: "Display mode",
+    onClick: () => setDisplay(!display)
+  }, "\uD83D\uDDA5\uFE0F"), /*#__PURE__*/React.createElement("button", {
     className: "iconbtn" + (isAdmin ? " active" : ""),
     title: "Admin",
-    onClick: () => {
-      if (isAdmin) setIsAdmin(false);else setShowPin(true);
+    onClick: gearClick
+  }, "\u2699\uFE0F")), ann.text && !bannerDismissed && /*#__PURE__*/React.createElement("div", {
+    className: "banner"
+  }, "\uD83D\uDCE2 ", ann.text, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setBannerDismissed(true)
+  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
+    className: "tabbar"
+  }, visibleTabs.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.key,
+    className: "tab" + (tab === t.key ? " active" : ""),
+    onClick: () => setTab(t.key)
+  }, t.icon, " ", t.label, counts[t.key] > 0 && /*#__PURE__*/React.createElement("span", {
+    className: "badge"
+  }, counts[t.key]), isAdmin && visibility[t.key] === false && /*#__PURE__*/React.createElement("span", {
+    className: "lock"
+  }, "\uD83D\uDD12")))), TabComp, showPin && /*#__PURE__*/React.createElement(PinPrompt, {
+    onClose: () => setShowPin(false),
+    onUnlock: () => {
+      setIsAdmin(true);
+      setShowPin(false);
+      setShowAdmin(true);
     }
-  }, "\u2699\uFE0F")), /*#__PURE__*/React.createElement(QATab, {
-    isAdmin: isAdmin
-  }), showPin && /*#__PURE__*/React.createElement("div", {
-    className: "overlay",
-    onClick: () => setShowPin(false)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal",
-    onClick: e => e.stopPropagation(),
-    style: {
-      maxWidth: 340
-    }
-  }, /*#__PURE__*/React.createElement("h2", {
-    style: {
-      color: "var(--gold)",
-      marginTop: 0
-    }
-  }, "Admin access"), /*#__PURE__*/React.createElement("input", {
-    type: "password",
-    inputMode: "numeric",
-    placeholder: "4-digit PIN",
-    value: pin,
-    onChange: e => setPin(e.target.value),
-    onKeyDown: e => e.key === "Enter" && submitPin()
-  }), /*#__PURE__*/React.createElement("button", {
-    className: "btn-gold",
-    onClick: submitPin
-  }, "Unlock"))));
+  }), showAdmin && /*#__PURE__*/React.createElement(AdminModal, {
+    onClose: () => setShowAdmin(false),
+    visibility: visibility,
+    setVisibility: setVisibility,
+    live: live,
+    setLive: setLive
+  }));
 }
-ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(TeaserApp, null));
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
 } catch (e) {
   document.getElementById('root').innerHTML =
     '<div style="padding:24px;color:#FF6B4A;font-family:monospace">App failed to start:<br><br>' +
