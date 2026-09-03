@@ -188,6 +188,33 @@
   .ledTotal .k{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--goldDim)}
   .ledTotal .v{font-size:14px;font-weight:600;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
 
+
+  /* 3D field of formulas and terms. Real depth via CSS perspective:
+     each item flies from far negative Z toward the viewer, so
+     perspective handles the scaling and parallax. Decorative only,
+     so aria-hidden and pointer-events:none. Removed under reduced
+     motion rather than frozen mid-flight. */
+  .floats{
+    position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;
+    perspective:700px;perspective-origin:50% 46%;
+  }
+  .fl{
+    position:absolute;left:50%;top:50%;white-space:nowrap;opacity:0;
+    animation-name:fly;animation-timing-function:linear;
+    animation-iteration-count:infinite;will-change:transform,opacity;
+  }
+  .fl.f{font-family:"Courier New",monospace;color:var(--goldDim)}
+  .fl.t{font-family:var(--fb);font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#33482F}
+  @keyframes fly{
+    0%   {transform:translate3d(var(--x),var(--y),-1500px) rotateY(var(--ry)) rotateX(var(--rx));opacity:0}
+    12%  {opacity:.52}
+    72%  {opacity:.42}
+    100% {transform:translate3d(var(--x),var(--y),300px) rotateY(var(--ry)) rotateX(var(--rx));opacity:0}
+  }
+  .hero{position:relative}
+  .heroIn{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%}
+  @media (prefers-reduced-motion:reduce){ .floats{display:none} }
+
   .qr{background:#fff;padding:11px;border-radius:12px;margin:22px 0 10px}
   .qr img{display:block;width:168px;height:168px}
 
@@ -242,7 +269,7 @@ const EVENT = {
   name: "CGP Annual Accounting Meeting",
   shortName: "Accounting Live Wall",
   pin: "1126",
-  startISO: "2026-09-16T13:45:00-05:00",
+  startISO: "2026-09-16T13:00:00-05:00",
   tz: "America/Chicago",
   url: "https://creightonjames-jpg.github.io/cgp-accounting-livewall/wall/"
 };
@@ -259,73 +286,85 @@ const VENUE = {
 /* ============================================================
    AGENDA
    ------------------------------------------------------------
-   Wednesday and Thursday are John's real agenda, loaded as sent.
-   Tuesday and Friday carry no sessions yet, so those two tabs show
-   the pending notice.
+   All four days loaded from John Martus's agenda.
 
-   Dates are confirmed against the calendar: Sept 16 2026 is a
-   Wednesday and Sept 17 is a Thursday, matching John's labels.
-   Tuesday 9/15 is arrivals, programming runs Wed and Thu.
+   Per John: presenter names are internal and are NOT rendered to
+   attendees. They live on each row in `presenter` so the internal
+   run of show keeps them and admin can reveal them. Do not delete.
 
-   Per John: presenter names are internal and are NOT rendered
-   to attendees. They are still stored on each row in
-   `presenter` so the internal run of show keeps them and
-   Display Mode can surface them. Do not delete that field.
-
-   Row shape:
-     t         start, 24h "HH:MM"
-     e         end, 24h "HH:MM"
-     title     what attendees see
-     kind      short ledger label, lowercase
-     detail    optional expandable text
-     presenter internal only, never rendered to attendees
+   End times are inferred where John gave only a start. Flagged
+   items still open: the 15 minute gap on Wednesday between Capex
+   (ends 2:15) and Century Golf Cares (starts 2:30), and the end
+   time for Wednesday evening activities.
    ============================================================ */
 const AGENDA = [
   {
     day: 1, date: "2026-09-15", dow: "TUE 9/15", nm: "Arrivals",
     title: "Arrivals", loc: "",
-    sub: "Travel in. Programming starts Wednesday afternoon.",
+    sub: "Travel in. Programming starts Wednesday.",
     attire: "",
-    pending: true,
-    ev: []
+    pending: false,
+    ev: [
+      { t: "19:30", e: "21:30", kind: "dinner", title: "Dinner", detail: "Oak'd BBQ.", presenter: "" }
+    ]
   },
   {
     day: 2, date: "2026-09-16", dow: "WED 9/16", nm: "Day One",
     title: "Day One", loc: "",
-    sub: "Operations, systems, and policy updates.",
+    sub: "Operations, systems, and policy.",
     attire: "",
     pending: false,
     ev: [
-      { t: "13:45", e: "14:00", kind: "", title: "Workers Comp", detail: "", presenter: "Tawny" },
+      { t: "12:00", e: "13:00", kind: "lunch", title: "Lunch", detail: "", presenter: "" },
+      { t: "13:00", e: "13:30", kind: "", title: "Greeting", detail: "", presenter: "John Martus" },
+      { t: "13:30", e: "13:45", kind: "", title: "Safety moment", detail: "", presenter: "John Martus" },
+      { t: "13:45", e: "14:00", kind: "", title: "Workers comp", detail: "", presenter: "Tawny" },
       { t: "14:00", e: "14:15", kind: "", title: "Capex", detail: "", presenter: "Janet" },
       { t: "14:30", e: "14:45", kind: "", title: "Century Golf Cares", detail: "", presenter: "Melissa" },
       { t: "14:45", e: "15:00", kind: "", title: "ADP / LMS", detail: "", presenter: "Melissa" },
-      { t: "15:00", e: "15:15", kind: "", title: "AI and social media policy, plus acknowledgment form", detail: "", presenter: "Melissa" },
+      { t: "15:00", e: "15:15", kind: "", title: "AI and social media policy", detail: "Includes the acknowledgment form.", presenter: "Melissa" },
       { t: "15:15", e: "16:00", kind: "", title: "Claude", detail: "", presenter: "Jim Creighton" },
       { t: "16:00", e: "16:30", kind: "", title: "Palmer Networks", detail: "", presenter: "George" },
-      { t: "16:30", e: "17:30", kind: "", title: "Spread and expenses", detail: "", presenter: "Greg" }
+      { t: "16:30", e: "17:30", kind: "", title: "Spread and expenses", detail: "", presenter: "Greg" },
+      { t: "17:30", e: "18:00", kind: "dinner", title: "Dinner served", detail: "Home Team Office.", presenter: "" },
+      { t: "18:00", e: "21:00", kind: "evening", title: "Corn hole, closest to the pin, and pool tournament", detail: "Closest to the pin runs on the simulator.", presenter: "" }
     ]
   },
   {
     day: 3, date: "2026-09-17", dow: "THU 9/17", nm: "Day Two",
     title: "Day Two", loc: "",
-    sub: "Membership, financial stewardship, and reporting.",
+    sub: "Membership, financial stewardship, and systems.",
     attire: "",
     pending: false,
     ev: [
+      { t: "08:00", e: "09:00", kind: "breakfast", title: "Breakfast", detail: "", presenter: "" },
       { t: "09:00", e: "09:15", kind: "", title: "Safety moment", detail: "", presenter: "Bryan Stromme" },
       { t: "09:15", e: "10:30", kind: "", title: "Membership: core fundamentals", detail: "", presenter: "Lisa Henrichsen" },
+      { t: "10:30", e: "10:45", kind: "break", title: "Break", detail: "", presenter: "" },
       { t: "10:45", e: "12:00", kind: "", title: "Financial stewardship", detail: "", presenter: "Mike" },
-      { t: "14:00", e: "14:30", kind: "", title: "New MOS update", detail: "", presenter: "Jeannette" }
+      { t: "12:00", e: "13:00", kind: "lunch", title: "Lunch", detail: "Sponsored by FloQast.", presenter: "" },
+      { t: "13:00", e: "14:00", kind: "", title: "FloQast presentation", detail: "", presenter: "Nick Heger" },
+      { t: "14:00", e: "14:30", kind: "", title: "New MOS update", detail: "", presenter: "Jeannette" },
+      { t: "14:30", e: "14:45", kind: "break", title: "Break", detail: "", presenter: "" },
+      { t: "14:45", e: "16:30", kind: "", title: "EZ Suite", detail: "", presenter: "Patrick Braco and Dan Walker" },
+      { t: "16:30", e: "17:30", kind: "free", title: "Free time at the hotel", detail: "", presenter: "" },
+      { t: "17:30", e: "17:45", kind: "evening", title: "Shuttle to PinStack", detail: "", presenter: "" }
     ]
   },
   {
-    day: 4, date: "2026-09-18", dow: "FRI 9/18", nm: "Departures",
-    title: "Departures", loc: "",
-    sub: "Safe travels home.",
+    day: 4, date: "2026-09-18", dow: "FRI 9/18", nm: "Day Three",
+    title: "Day Three / Departures", loc: "",
+    sub: "Awards, ERP, and the year ahead.",
     attire: "",
-    pending: true,
-    ev: []
+    pending: false,
+    ev: [
+      { t: "08:00", e: "09:00", kind: "breakfast", title: "Breakfast", detail: "", presenter: "" },
+      { t: "09:00", e: "09:15", kind: "", title: "Safety moment", detail: "", presenter: "Eric" },
+      { t: "09:15", e: "09:45", kind: "awards", title: "Awards", detail: "Accountant of the Year. Excellence Awards.", presenter: "" },
+      { t: "09:45", e: "10:15", kind: "", title: "ERP update", detail: "", presenter: "Dedra and John" },
+      { t: "10:15", e: "11:00", kind: "", title: "Leadership and looking ahead", detail: "", presenter: "Mike Akeroyd, Jimmy Han, Doug Howe, Jim Hinckley" },
+      { t: "11:00", e: "13:00", kind: "", title: "Lunch and departures", detail: "", presenter: "" }
+    ]
   }
 ];
 
@@ -1090,6 +1129,82 @@ function AdminModal({ onClose }) {
   );
 }
 
+
+/* ============================================================
+   DRIFTING MARGINALIA
+   Excel formulas and accounting terms, per John's note. Positions
+   and timings are computed once on mount so they stay put across
+   re-renders instead of jumping every tick.
+   ============================================================ */
+const FORMULAS = [
+  "=SUM(B2:B13)",
+  "=SUMIFS(Amount,Dept,\"F&B\",Month,\"Sep\")",
+  "=VLOOKUP(A2,Chart!A:C,3,FALSE)",
+  "=XLOOKUP(A2,Accounts,Balance)",
+  "=INDEX(Balance,MATCH(A2,Account,0))",
+  "=IFERROR(B2/C2,0)",
+  "=(B2-C2)/C2",
+  "=SUBTOTAL(9,B2:B99)",
+  "=EOMONTH(TODAY(),0)",
+  "=NPV(0.08,C2:C13)",
+  "=IRR(D2:D13)",
+  "=SLN(50000,5000,7)",
+  "=ROUND(B2*C2,2)",
+  "=TEXT(B2,\"$#,##0.00\")",
+  "=SUM(Revenue)-SUM(COGS)"
+];
+const TERMS = [
+  "GAAP", "Assets", "Liabilities", "Accrual", "Balance Sheet",
+  "Income Statement", "Gross Margin", "COGS", "EBITDA"
+];
+
+function Floats() {
+  const items = useMemo(() => {
+    const pool = [];
+    FORMULAS.forEach(v => pool.push({ v, k: "f" }));
+    TERMS.forEach(v => pool.push({ v, k: "t" }));
+    const n = pool.length;
+    return pool.map((it, i) => {
+      // Two different hashes so x and y do not correlate into stripes.
+      const j1 = ((i * 2654435761) % 1000) / 1000;
+      const j2 = ((i * 40503 + 12345) % 1000) / 1000;
+      const dur = 19 + Math.round(j1 * 15);
+      return {
+        ...it,
+        x: Math.round((j1 - 0.5) * 840),
+        y: Math.round((j2 - 0.5) * 680),
+        ry: Math.round((j1 - 0.5) * 46),
+        rx: Math.round((j2 - 0.5) * 22),
+        size: it.k === "f" ? 15 + Math.round(j1 * 6) : 12 + Math.round(j2 * 4),
+        dur,
+        // Negative delays so the field is already populated at load
+        // instead of every item starting from the far plane together.
+        delay: -Math.round((i / n) * dur * 1.7)
+      };
+    });
+  }, []);
+
+  return (
+    <div className="floats" aria-hidden="true">
+      {items.map((it, i) => (
+        <span
+          key={i}
+          className={"fl " + it.k}
+          style={{
+            fontSize: it.size,
+            animationDuration: it.dur + "s",
+            animationDelay: it.delay + "s",
+            "--x": it.x + "px",
+            "--y": it.y + "px",
+            "--ry": it.ry + "deg",
+            "--rx": it.rx + "deg"
+          }}
+        >{it.v}</span>
+      ))}
+    </div>
+  );
+}
+
 function Welcome({ onEnter }) {
   const [left, setLeft] = useState(undefined);
   useEffect(() => {
@@ -1116,6 +1231,8 @@ function Welcome({ onEnter }) {
 
   return (
     <div className="hero">
+      <Floats />
+      <div className="heroIn">
       <div className="brandSub">Century Golf Partners</div>
       <h1 className="heroT">Accounting Meeting</h1>
       <p className="heroSub">
@@ -1147,6 +1264,7 @@ function Welcome({ onEnter }) {
 
       <button className="btn" style={{ marginTop: 26, padding: "14px 34px", fontSize: 17 }}
         onClick={onEnter}>Open the wall</button>
+      </div>
     </div>
   );
 }
