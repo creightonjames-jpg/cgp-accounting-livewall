@@ -950,5 +950,134 @@ ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.c
   console.error(e);
 }
 </script>
+
+<!-- ============================================================
+     Added outside <div id="root"> on purpose. React owns that div
+     and rewrites it on every render, so anything placed inside
+     would be wiped. Nothing below touches the teaser's own markup,
+     styles, or script.
+
+     Two things here:
+       1. A 3D field of drifting Excel formulas and accounting terms.
+       2. The link through to the full Live Wall.
+     ============================================================ -->
+<style>
+  /* Lift the app above the 3D layer. The teaser puts its background
+     on <body>, and #root has none, so the field shows through. */
+  #root{ position:relative; z-index:1; }
+  body{ padding-bottom:92px; }
+
+  /* --- 3D formula field --------------------------------------
+     Real depth via CSS perspective: each item flies from far
+     negative Z toward the viewer, so perspective does the scaling
+     and the parallax for free. Decorative only, so aria-hidden and
+     pointer-events:none. Removed under reduced motion rather than
+     frozen mid-flight. */
+  #cgpField{
+    position:fixed; inset:0; overflow:hidden; pointer-events:none;
+    z-index:0;
+    perspective:700px;
+    perspective-origin:50% 46%;
+  }
+  #cgpField span{
+    position:absolute; left:50%; top:50%;
+    white-space:nowrap; opacity:0;
+    animation-name:cgpFly; animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    will-change:transform,opacity;
+  }
+  #cgpField span.fx{ font-family:"Courier New",monospace; color:#8B7541; }
+  #cgpField span.tx{
+    font-family:'Source Sans 3',Arial,sans-serif; font-weight:700;
+    letter-spacing:3px; text-transform:uppercase; color:#33482F;
+  }
+  @keyframes cgpFly{
+    0%   { transform:translate3d(var(--x),var(--y),-1500px) rotateY(var(--ry)) rotateX(var(--rx)); opacity:0; }
+    12%  { opacity:.52; }
+    72%  { opacity:.42; }
+    100% { transform:translate3d(var(--x),var(--y),300px) rotateY(var(--ry)) rotateX(var(--rx)); opacity:0; }
+  }
+  @media (prefers-reduced-motion:reduce){ #cgpField{ display:none; } }
+
+  /* --- link to the full wall --------------------------------- */
+  #cgpWallLink{
+    position:fixed; left:0; right:0; bottom:0; z-index:9999;
+    background:rgba(12,26,15,.96); border-top:1px solid #2A3D2E;
+    padding:11px 16px calc(11px + env(safe-area-inset-bottom,0px));
+    display:flex; gap:12px; align-items:center; justify-content:center;
+    flex-wrap:wrap; font-family:'Source Sans 3',Arial,sans-serif;
+  }
+  #cgpWallLink .t{ font-size:14px; color:#8A8878; }
+  #cgpWallLink .t b{ color:#E8E5D8; font-weight:600; }
+  #cgpWallLink a{
+    background:linear-gradient(160deg,#C9A54E,#a8863a); color:#12200f;
+    text-decoration:none; font-weight:700; font-size:15px;
+    padding:10px 20px; border-radius:9px; white-space:nowrap;
+  }
+  #cgpWallLink a:focus-visible{ outline:2px solid #E8E5D8; outline-offset:2px; }
+  @media (max-width:380px){ #cgpWallLink .t{ display:none; } }
+</style>
+
+<div id="cgpField" aria-hidden="true"></div>
+
+<div id="cgpWallLink">
+  <span class="t"><b>The full wall is live.</b> Agenda, forecast, and questions.</span>
+  <a href="./wall/">Open the wall</a>
+</div>
+
+<script>
+(function(){
+  var host = document.getElementById('cgpField');
+  if (!host) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var FORMULAS = [
+    '=SUM(B2:B13)',
+    '=SUMIFS(Amount,Dept,"F&B",Month,"Sep")',
+    '=VLOOKUP(A2,Chart!A:C,3,FALSE)',
+    '=XLOOKUP(A2,Accounts,Balance)',
+    '=INDEX(Balance,MATCH(A2,Account,0))',
+    '=IFERROR(B2/C2,0)',
+    '=(B2-C2)/C2',
+    '=SUBTOTAL(9,B2:B99)',
+    '=EOMONTH(TODAY(),0)',
+    '=NPV(0.08,C2:C13)',
+    '=IRR(D2:D13)',
+    '=SLN(50000,5000,7)',
+    '=ROUND(B2*C2,2)',
+    '=TEXT(B2,"$#,##0.00")',
+    '=SUM(Revenue)-SUM(COGS)'
+  ];
+  var TERMS = ['GAAP','Assets','Liabilities','Accrual','Balance Sheet',
+               'Income Statement','Gross Margin','COGS','EBITDA'];
+
+  var items = [];
+  for (var a = 0; a < FORMULAS.length; a++) items.push([FORMULAS[a], 'fx']);
+  for (var b = 0; b < TERMS.length; b++) items.push([TERMS[b], 'tx']);
+
+  var n = items.length;
+  for (var i = 0; i < n; i++) {
+    // Two different hashes so x and y don't correlate into stripes.
+    var j1 = ((i * 2654435761) % 1000) / 1000;
+    var j2 = ((i * 40503 + 12345) % 1000) / 1000;
+    var isFx = items[i][1] === 'fx';
+    var dur = 19 + Math.round(j1 * 15);
+
+    var s = document.createElement('span');
+    s.className = items[i][1];
+    s.textContent = items[i][0];
+    s.style.setProperty('--x',  Math.round((j1 - 0.5) * 840) + 'px');
+    s.style.setProperty('--y',  Math.round((j2 - 0.5) * 680) + 'px');
+    s.style.setProperty('--ry', Math.round((j1 - 0.5) * 46) + 'deg');
+    s.style.setProperty('--rx', Math.round((j2 - 0.5) * 22) + 'deg');
+    s.style.fontSize = (isFx ? 15 + Math.round(j1 * 6) : 12 + Math.round(j2 * 4)) + 'px';
+    s.style.animationDuration = dur + 's';
+    // Negative delays so the field is already populated at load
+    // instead of every item starting from the far plane together.
+    s.style.animationDelay = (-Math.round((i / n) * dur * 1.7)) + 's';
+    host.appendChild(s);
+  }
+})();
+</script>
 </body>
 </html>
