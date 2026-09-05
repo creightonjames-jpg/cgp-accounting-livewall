@@ -41,6 +41,10 @@
   }
 
   .wrap{max-width:760px;margin:0 auto;padding:0 16px 56px}
+  /* Grids get more room than prose. 760px is right for reading the
+     agenda and questions, but it squeezes a 55 person directory into
+     four columns with dead space either side on a laptop. */
+  .wrapWide{max-width:1240px;margin:0 auto;padding:0 16px 56px}
 
   /* footing: a double rule under a column, then its total. The double
      rule appears ONLY here and on the cover total. Single hairlines
@@ -126,18 +130,18 @@
 
 
   /* attendees */
-  .people{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding-top:4px}
+  .people{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));padding-top:4px;align-items:start}
   .person{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
   .person .pic{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--input)}
   .person .ini{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
     background:var(--input);font-family:var(--ff);font-size:30px;font-weight:700;color:var(--goldDim)}
-  .person .who{padding:9px 11px 11px}
+  .person .who{padding:9px 11px 11px;min-height:62px}
   .person .nm2{font-family:var(--ff);font-size:16px;font-weight:700;line-height:1.2}
   .person .ti{font-size:13px;color:var(--dim);margin-top:3px;line-height:1.35}
   .person .cl{font-size:12px;color:var(--goldDim);margin-top:2px;line-height:1.35}
 
   /* photos */
-  .shots{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));padding-top:4px}
+  .shots{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding-top:4px}
   .shot{position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--input);cursor:pointer}
   .shot img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
   .shot .cap{padding:6px 8px}
@@ -1178,7 +1182,7 @@ function AttendeesTab({ dm }) {
   const shown = ROSTER.filter(hit);
 
   return (
-    <div className="wrap">
+    <div className="wrapWide">
       <h2 className="sectitle">Attendees</h2>
       <p className="secdesc">
         Everyone on the tour this week.
@@ -1453,7 +1457,7 @@ function PhotosTab({ dm, isAdmin }) {
   };
 
   return (
-    <div className="wrap">
+    <div className="wrapWide">
       <h2 className="sectitle">Photos</h2>
       <p className="secdesc">
         Whatever you catch this week.
