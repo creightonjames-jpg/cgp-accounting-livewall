@@ -130,15 +130,18 @@
 
 
   /* attendees */
-  .people{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));padding-top:4px;align-items:start}
+  .people{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));padding-top:4px;align-items:start}
   .person{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
   .person .pic{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--input)}
   .person .ini{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
     background:var(--input);font-family:var(--ff);font-size:30px;font-weight:700;color:var(--goldDim)}
-  .person .who{padding:9px 11px 11px;min-height:62px}
-  .person .nm2{font-family:var(--ff);font-size:16px;font-weight:700;line-height:1.2}
+  /* Fixed height, not min-height. Long names and two line club names
+     were making every card a different height, which read as ragged.
+     Clamp the text instead of letting it push the card taller. */
+  .person .who{padding:9px 11px 11px;height:74px;overflow:hidden}
+  .person .nm2{font-family:var(--ff);font-size:15px;font-weight:700;line-height:1.18;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .person .ti{font-size:13px;color:var(--dim);margin-top:3px;line-height:1.35}
-  .person .cl{font-size:12px;color:var(--goldDim);margin-top:2px;line-height:1.35}
+  .person .cl{font-size:11.5px;color:var(--goldDim);margin-top:2px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
   /* photos */
   .shots{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding-top:4px}
