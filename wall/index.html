@@ -152,7 +152,14 @@
     backdrop-filter:blur(4px);font-family:var(--fb)
   }
   .pbtn:hover{background:var(--gold);color:#12200f}
-  .pbtn.rm{border-color:var(--danger);color:var(--danger);right:auto;left:6px}
+  .pbtn.cr{right:auto;left:6px}
+  /* Remove is a small cross at the bottom, so three controls fit a
+     narrow card without crowding the top edge. */
+  .pbtn.rm{
+    border-color:var(--danger);color:var(--danger);
+    top:auto;bottom:6px;right:6px;left:auto;
+    padding:1px 7px;font-size:14px;line-height:1.35
+  }
   .pbtn.rm:hover{background:var(--danger);color:#fff}
   .pbusy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:rgba(12,26,15,.72);z-index:3;font-size:12px;color:var(--gold)}
@@ -1348,6 +1355,12 @@ function CropModal({ file, name, onCancel, onSave }) {
         <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>
           Drag to move. Pinch, scroll, or use the slider to zoom.
         </p>
+        {nat && Math.max(nat.w, nat.h) <= 520 && (
+          <p style={{ fontSize: 12, color: "var(--goldDim)", marginTop: 4 }}>
+            This is already a cropped copy at {nat.w} by {nat.h}, so zooming
+            in will soften it. Upload the original for a tighter crop.
+          </p>
+        )}
 
         <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
           <button className="btn" style={{ flex: 1 }} disabled={!nat || saving} onClick={save}>
@@ -1398,6 +1411,27 @@ function AttendeesTab({ dm, isAdmin }) {
     if (!f || !slug) return;
     const who = ROSTER.find(r => slugOf(r.name) === slug);
     setCrop({ file: f, slug, name: who ? who.name : slug });
+  };
+
+  // Re-frame a photo that is already showing. Works for both an admin
+  // upload (a data URL) and a static repo file, since both are
+  // fetchable from this page.
+  const reframe = async slug => {
+    const src = srcFor(slug);
+    if (!src) return;
+    setBusy(slug);
+    try {
+      const b = await fetch(src).then(r => r.blob());
+      const who = ROSTER.find(r => slugOf(r.name) === slug);
+      setCrop({
+        file: new File([b], "current.jpg", { type: b.type || "image/jpeg" }),
+        slug,
+        name: who ? who.name : slug
+      });
+    } catch (ex) {
+      window.alert("Could not load that photo to re-crop.");
+    }
+    setBusy("");
   };
 
   const commitCrop = data => {
@@ -1455,7 +1489,7 @@ function AttendeesTab({ dm, isAdmin }) {
           {isAdmin && (
             <div className="pending" style={{ borderStyle: "solid", borderColor: "var(--border)" }}>
               <b>Admin.</b> Tap Add on any card to upload that person's photo.
-              You can zoom and drag to frame it before saving.
+              Tap Crop to re-frame one that is already there.
               {Object.keys(shots || {}).length > 0 && (
                 <span style={{ color: "var(--goldDim)" }}> {Object.keys(shots).length} uploaded so far.</span>
               )}
@@ -1484,8 +1518,12 @@ function AttendeesTab({ dm, isAdmin }) {
                       {(own || got[slug]) ? "Replace" : "Add"}
                     </button>
                   )}
+                  {isAdmin && (own || got[slug]) && (
+                    <button className="pbtn cr" onClick={() => reframe(slug)}>Crop</button>
+                  )}
                   {isAdmin && own && (
-                    <button className="pbtn rm" onClick={() => clear(slug, p.name)}>Remove</button>
+                    <button className="pbtn rm" title="Remove uploaded photo"
+                      onClick={() => clear(slug, p.name)}>&times;</button>
                   )}
                   {src ? (
                     <img key={src} className="pic" alt=""
