@@ -1304,7 +1304,9 @@ function AttendeesTab({ dm, isAdmin }) {
                     <button className="pbtn rm" onClick={() => clear(slug, p.name)}>Remove</button>
                   )}
                   {src ? (
-                    <img className="pic" alt="" loading="lazy" src={src}
+                    <img key={src} className="pic" alt=""
+                      loading={src.slice(0,5) === "data:" ? "eager" : "lazy"}
+                      src={src}
                       onLoad={() => setGot(g => (g[slug] ? g : { ...g, [slug]: true }))}
                       onError={() => {
                         setGot(g => { if (!g[slug]) return g; const n = { ...g }; delete n[slug]; return n; });
