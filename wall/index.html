@@ -143,6 +143,20 @@
   .person .ti{font-size:13px;color:var(--dim);margin-top:3px;line-height:1.35}
   .person .cl{font-size:11.5px;color:var(--goldDim);margin-top:2px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+  /* admin photo control on each attendee card */
+  .person{position:relative}
+  .pbtn{
+    position:absolute;top:6px;right:6px;z-index:2;
+    background:rgba(12,26,15,.86);border:1px solid var(--gold);color:var(--gold);
+    border-radius:14px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;
+    backdrop-filter:blur(4px);font-family:var(--fb)
+  }
+  .pbtn:hover{background:var(--gold);color:#12200f}
+  .pbtn.rm{border-color:var(--danger);color:var(--danger);right:auto;left:6px}
+  .pbtn.rm:hover{background:var(--danger);color:#fff}
+  .pbusy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(12,26,15,.72);z-index:3;font-size:12px;color:var(--gold)}
+
   /* photos */
   .shots{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding-top:4px}
   .shot{position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--input);cursor:pointer}
@@ -1172,10 +1186,54 @@ const GROUPS = [
   { id: "century", label: "Century" }
 ];
 
-function AttendeesTab({ dm }) {
+function AttendeesTab({ dm, isAdmin }) {
   const [q, setQ] = useState("");
   const [grp, setGrp] = useState("all");
-  const [broken, setBroken] = useState({});
+  // How far down the photo fallback chain each person has fallen.
+  // 0 = the main folder, 1 = the nested folder some uploads landed in,
+  // 2 = give up and show initials.
+  const [step, setStep] = useState({});
+  const [got, setGot] = useState({});
+  const [busy, setBusy] = useState("");
+  const [, shots] = useNode("roster_photos");
+  const pick = useRef(null);
+  const target = useRef("");
+
+  const PATHS = slug => [
+    "../attendee-pics/" + slug + ".jpg",
+    "../attendee-pics/missing-11-pics/" + slug + ".jpg"
+  ];
+  const srcFor = slug => {
+    const up = shots[slug];
+    if (up && up.data) return up.data;
+    const s = step[slug] || 0;
+    return s < 2 ? PATHS(slug)[s] : null;
+  };
+  const choose = slug => {
+    target.current = slug;
+    if (pick.current) { pick.current.value = ""; pick.current.click(); }
+  };
+  const upload = async e => {
+    const f = e.target.files && e.target.files[0];
+    const slug = target.current;
+    if (!f || !slug) return;
+    setBusy(slug);
+    try {
+      // 320px is plenty for a card rendering near 150px, even on retina,
+      // and keeps the node small enough for phones to pull quickly.
+      const data = await compress(f, 320, 0.72);
+      store.setNode("roster_photos/" + slug, { data, ts: Date.now() });
+      setStep(s => ({ ...s, [slug]: 0 }));
+    } catch (ex) {
+      window.alert("That image could not be read. Try a JPG or PNG.");
+    }
+    setBusy("");
+  };
+  const clear = (slug, name) => {
+    if (!window.confirm("Remove the uploaded photo for " + name + "?")) return;
+    store.clearNode("roster_photos/" + slug);
+    setStep(s => ({ ...s, [slug]: 0 }));
+  };
   const hit = p => {
     if (grp !== "all" && p.group !== grp) return false;
     const s = q.trim().toLowerCase();
@@ -1196,8 +1254,7 @@ function AttendeesTab({ dm }) {
 
       {ROSTER.length === 0 ? (
         <div className="pending">
-          <b>Roster pending.</b> Names and headshots drop straight in. Photos
-          go in the repo at wall/assets/attendees/ named firstname-lastname.jpg
+          <b>Roster pending.</b> Names drop straight in.
         </div>
       ) : (
         <>
@@ -1216,19 +1273,45 @@ function AttendeesTab({ dm }) {
               </button>
             ))}
           </div>
+          {isAdmin && (
+            <div className="pending" style={{ borderStyle: "solid", borderColor: "var(--border)" }}>
+              <b>Admin.</b> Tap Add on any card to upload that person's photo.
+              It saves for everyone straight away, no repo needed.
+              {Object.keys(shots || {}).length > 0 && (
+                <span style={{ color: "var(--goldDim)" }}> {Object.keys(shots).length} uploaded so far.</span>
+              )}
+            </div>
+          )}
+
+          <input ref={pick} type="file" accept="image/*"
+            onChange={upload} style={{ display: "none" }} />
+
           {shown.length === 0 && <p className="empty">Nobody matches that.</p>}
           <div className="people">
             {shown.map((p, i) => {
               const slug = slugOf(p.name);
-              const showIni = broken[slug];
+              const src = srcFor(slug);
+              const own = !!(shots[slug] && shots[slug].data);
               return (
                 <div key={i} className="person">
-                  {showIni ? (
-                    <div className="ini">{initialsOf(p.name)}</div>
+                  {busy === slug && <div className="pbusy">Uploading...</div>}
+                  {isAdmin && (
+                    <button className="pbtn" onClick={() => choose(slug)}>
+                      {(own || got[slug]) ? "Replace" : "Add"}
+                    </button>
+                  )}
+                  {isAdmin && own && (
+                    <button className="pbtn rm" onClick={() => clear(slug, p.name)}>Remove</button>
+                  )}
+                  {src ? (
+                    <img className="pic" alt="" loading="lazy" src={src}
+                      onLoad={() => setGot(g => (g[slug] ? g : { ...g, [slug]: true }))}
+                      onError={() => {
+                        setGot(g => { if (!g[slug]) return g; const n = { ...g }; delete n[slug]; return n; });
+                        setStep(s => ({ ...s, [slug]: (s[slug] || 0) + 1 }));
+                      }} />
                   ) : (
-                    <img className="pic" alt="" loading="lazy"
-                      src={"../attendee-pics/" + slug + ".jpg"}
-                      onError={() => setBroken(b => ({ ...b, [slug]: true }))} />
+                    <div className="ini">{initialsOf(p.name)}</div>
                   )}
                   <div className="who">
                     <div className="nm2">{p.name}</div>
@@ -1609,7 +1692,8 @@ function AdminModal({ onClose }) {
     ["weather", "Forecast cache"],
     ["takeaways", "Takeaways"],
     ["shoutouts", "Shoutouts"],
-    ["photos", "Photos"]
+    ["photos", "Photos"],
+    ["roster_photos", "Attendee photos"]
   ];
   return (
     <div className="ovl" onClick={onClose}>
@@ -1865,7 +1949,7 @@ function App() {
       </header>
 
       {tab === "agenda" && <AgendaTab dm={dm} isAdmin={isAdmin} />}
-      {tab === "attendees" && <AttendeesTab dm={dm} />}
+      {tab === "attendees" && <AttendeesTab dm={dm} isAdmin={isAdmin} />}
       {tab === "questions" && <QATab dm={dm} isAdmin={isAdmin} />}
       {tab === "takeaways" && <TakeawaysTab dm={dm} isAdmin={isAdmin} />}
       {tab === "shoutouts" && <ShoutoutsTab dm={dm} isAdmin={isAdmin} />}
