@@ -157,6 +157,24 @@
   .pbusy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:rgba(12,26,15,.72);z-index:3;font-size:12px;color:var(--gold)}
 
+  /* crop and zoom dialog */
+  .cropWrap{max-width:380px;width:100%}
+  .cropBox{
+    position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:10px;
+    background:#0a140c;border:1px solid var(--border);touch-action:none;cursor:grab;
+  }
+  .cropBox.drag{cursor:grabbing}
+  .cropBox img{position:absolute;left:50%;top:50%;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none}
+  .cropGuide{position:absolute;inset:0;pointer-events:none}
+  .cropGuide i{position:absolute;background:rgba(232,229,216,.16)}
+  .cropGuide i.v1{left:33.33%;top:0;bottom:0;width:1px}
+  .cropGuide i.v2{left:66.66%;top:0;bottom:0;width:1px}
+  .cropGuide i.h1{top:33.33%;left:0;right:0;height:1px}
+  .cropGuide i.h2{top:66.66%;left:0;right:0;height:1px}
+  .zoomRow{display:flex;align-items:center;gap:10px;margin-top:13px}
+  .zoomRow input[type=range]{flex:1;accent-color:var(--gold)}
+  .zoomRow .zlab{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--goldDim)}
+
   /* photos */
   .shots{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding-top:4px}
   .shot{position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--input);cursor:pointer}
@@ -1186,6 +1204,164 @@ const GROUPS = [
   { id: "century", label: "Century" }
 ];
 
+/* ============================================================
+   CROP AND ZOOM
+   Drag to move, slider or wheel or pinch to zoom. The image is
+   always held large enough to cover the frame, so a crop can
+   never contain empty edges.
+   ============================================================ */
+function CropModal({ file, name, onCancel, onSave }) {
+  const [url, setUrl] = useState("");
+  const [nat, setNat] = useState(null);
+  const [zoom, setZoom] = useState(1);
+  const [off, setOff] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const boxRef = useRef(null);
+  const imgRef = useRef(null);
+  const drag = useRef(null);
+  const pinch = useRef(null);
+
+  useEffect(() => {
+    const u = URL.createObjectURL(file);
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [file]);
+
+  // clientWidth is 0 until layout runs, and dividing by it would blow up
+  const box = () => {
+    const w = boxRef.current ? boxRef.current.clientWidth : 0;
+    return w > 0 ? w : 300;
+  };
+  const baseScale = () => {
+    if (!nat) return 1;
+    return Math.max(box() / nat.w, box() / nat.h);
+  };
+  const scale = () => baseScale() * zoom;
+
+  // never let the frame show past the edge of the image
+  const clamp = (o, z) => {
+    if (!nat) return o;
+    const s = baseScale() * z;
+    const mx = Math.max(0, (nat.w * s - box()) / 2);
+    const my = Math.max(0, (nat.h * s - box()) / 2);
+    return {
+      x: Math.max(-mx, Math.min(mx, o.x)),
+      y: Math.max(-my, Math.min(my, o.y))
+    };
+  };
+  useEffect(() => { setOff(o => clamp(o, zoom)); }, [zoom, nat]);
+
+  const dist = ts => {
+    const a = ts[0], b = ts[1];
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  };
+
+  const down = e => {
+    if (e.touches && e.touches.length === 2) {
+      pinch.current = { d: dist([e.touches[0], e.touches[1]]), z: zoom };
+      return;
+    }
+    const pt = e.touches ? e.touches[0] : e;
+    drag.current = { x: pt.clientX, y: pt.clientY, ox: off.x, oy: off.y };
+    setDragging(true);
+  };
+  const move = e => {
+    if (pinch.current && e.touches && e.touches.length === 2) {
+      const d = dist([e.touches[0], e.touches[1]]);
+      const next = Math.max(1, Math.min(4, pinch.current.z * (d / pinch.current.d)));
+      setZoom(Math.round(next * 100) / 100);
+      if (e.preventDefault) e.preventDefault();
+      return;
+    }
+    if (!drag.current) return;
+    const pt = e.touches ? e.touches[0] : e;
+    setOff(clamp({
+      x: drag.current.ox + (pt.clientX - drag.current.x),
+      y: drag.current.oy + (pt.clientY - drag.current.y)
+    }, zoom));
+    if (e.preventDefault) e.preventDefault();
+  };
+  const up = () => { drag.current = null; pinch.current = null; setDragging(false); };
+
+  const wheel = e => {
+    e.preventDefault();
+    setZoom(z => Math.round(Math.max(1, Math.min(4, z - e.deltaY * 0.0016)) * 100) / 100);
+  };
+
+  const save = () => {
+    if (!nat) return;
+    setSaving(true);
+    try {
+      const OUT = 400;
+      const s = scale();
+      const side = box() / s;
+      const sx = nat.w / 2 - off.x / s - side / 2;
+      const sy = nat.h / 2 - off.y / s - side / 2;
+      const c = document.createElement("canvas");
+      c.width = OUT; c.height = OUT;
+      const ctx = c.getContext("2d");
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(imgRef.current, sx, sy, side, side, 0, 0, OUT, OUT);
+      onSave(c.toDataURL("image/jpeg", 0.8));
+    } catch (ex) {
+      window.alert("Could not save that crop. Try again.");
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="ovl" onClick={onCancel}>
+      <div className="modal cropWrap" onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+          <h2 style={{ fontFamily: "var(--ff)", fontSize: 19 }}>Frame the photo</h2>
+          <span style={{ fontSize: 13, color: "var(--goldDim)" }}>{name}</span>
+        </div>
+
+        <div ref={boxRef}
+          className={"cropBox" + (dragging ? " drag" : "")}
+          onMouseDown={down} onMouseMove={move} onMouseUp={up} onMouseLeave={up}
+          onTouchStart={down} onTouchMove={move} onTouchEnd={up}
+          onWheel={wheel}>
+          {url && (
+            <img ref={imgRef} src={url} alt=""
+              onLoad={e => setNat({ w: e.target.naturalWidth, h: e.target.naturalHeight })}
+              style={nat ? {
+                width: nat.w * scale(),
+                height: nat.h * scale(),
+                transform: "translate(" + (off.x - nat.w * scale() / 2) + "px," +
+                                          (off.y - nat.h * scale() / 2) + "px)"
+              } : { visibility: "hidden" }} />
+          )}
+          <div className="cropGuide"><i className="v1" /><i className="v2" /><i className="h1" /><i className="h2" /></div>
+        </div>
+
+        <div className="zoomRow">
+          <span className="zlab">Zoom</span>
+          <input type="range" min="1" max="4" step="0.01"
+            value={zoom} onChange={e => setZoom(parseFloat(e.target.value))} />
+          <span className="zlab" style={{ minWidth: 34, textAlign: "right" }}>
+            {zoom.toFixed(1)}x
+          </span>
+        </div>
+
+        <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>
+          Drag to move. Pinch, scroll, or use the slider to zoom.
+        </p>
+
+        <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+          <button className="btn" style={{ flex: 1 }} disabled={!nat || saving} onClick={save}>
+            {saving ? "Saving..." : "Save photo"}
+          </button>
+          <button className="btnS" style={{ padding: "11px 18px", fontSize: 15 }} onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AttendeesTab({ dm, isAdmin }) {
   const [q, setQ] = useState("");
   const [grp, setGrp] = useState("all");
@@ -1195,6 +1371,7 @@ function AttendeesTab({ dm, isAdmin }) {
   const [step, setStep] = useState({});
   const [got, setGot] = useState({});
   const [busy, setBusy] = useState("");
+  const [crop, setCrop] = useState(null);
   const [, shots] = useNode("roster_photos");
   const pick = useRef(null);
   const target = useRef("");
@@ -1213,20 +1390,22 @@ function AttendeesTab({ dm, isAdmin }) {
     target.current = slug;
     if (pick.current) { pick.current.value = ""; pick.current.click(); }
   };
-  const upload = async e => {
+  // Picking a file no longer saves straight away. It opens the cropper so
+  // the framing is a decision, not a guess made by the code.
+  const upload = e => {
     const f = e.target.files && e.target.files[0];
     const slug = target.current;
     if (!f || !slug) return;
+    const who = ROSTER.find(r => slugOf(r.name) === slug);
+    setCrop({ file: f, slug, name: who ? who.name : slug });
+  };
+
+  const commitCrop = data => {
+    const slug = crop.slug;
+    setCrop(null);
     setBusy(slug);
-    try {
-      // 320px is plenty for a card rendering near 150px, even on retina,
-      // and keeps the node small enough for phones to pull quickly.
-      const data = await compress(f, 320, 0.72);
-      store.setNode("roster_photos/" + slug, { data, ts: Date.now() });
-      setStep(s => ({ ...s, [slug]: 0 }));
-    } catch (ex) {
-      window.alert("That image could not be read. Try a JPG or PNG.");
-    }
+    store.setNode("roster_photos/" + slug, { data, ts: Date.now() });
+    setStep(s => ({ ...s, [slug]: 0 }));
     setBusy("");
   };
   const clear = (slug, name) => {
@@ -1276,7 +1455,7 @@ function AttendeesTab({ dm, isAdmin }) {
           {isAdmin && (
             <div className="pending" style={{ borderStyle: "solid", borderColor: "var(--border)" }}>
               <b>Admin.</b> Tap Add on any card to upload that person's photo.
-              It saves for everyone straight away, no repo needed.
+              You can zoom and drag to frame it before saving.
               {Object.keys(shots || {}).length > 0 && (
                 <span style={{ color: "var(--goldDim)" }}> {Object.keys(shots).length} uploaded so far.</span>
               )}
@@ -1285,6 +1464,11 @@ function AttendeesTab({ dm, isAdmin }) {
 
           <input ref={pick} type="file" accept="image/*"
             onChange={upload} style={{ display: "none" }} />
+
+          {crop && (
+            <CropModal file={crop.file} name={crop.name}
+              onCancel={() => setCrop(null)} onSave={commitCrop} />
+          )}
 
           {shown.length === 0 && <p className="empty">Nobody matches that.</p>}
           <div className="people">
