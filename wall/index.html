@@ -202,6 +202,11 @@
   .note p{font-size:16px;line-height:1.5;color:var(--text)}
   .note .by{font-size:12px;color:var(--mute);margin-top:4px}
   .note .arrow{color:var(--goldDim);font-weight:700}
+  .note .tag{
+    display:inline-block;margin-right:7px;padding:1px 6px;border-radius:3px;
+    background:var(--input);border:1px solid var(--border);
+    font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--goldDim)
+  }
 
   /* generic */
   .sectitle{font-family:var(--ff);font-size:25px;font-weight:700;padding:22px 0 3px}
@@ -1559,26 +1564,57 @@ function AttendeesTab({ dm, isAdmin }) {
 }
 
 /* ============================================================
-   TAKEAWAYS  (flat, newest first)
+   TAKEAWAYS
+   Takeaways and shoutouts share one tab. The two Firebase nodes are
+   kept separate so nothing already posted has to be migrated; they
+   are merged here for display only.
    ============================================================ */
+const NOTE_KINDS = [
+  { id: "all", label: "All" },
+  { id: "takeaway", label: "Takeaways" },
+  { id: "shoutout", label: "Shoutouts" }
+];
+
 function TakeawaysTab({ dm, isAdmin }) {
-  const [list] = useNode("takeaways");
+  const [takes] = useNode("takeaways");
+  const [shouts] = useNode("shoutouts");
+  const [kind, setKind] = useState("takeaway");
+  const [filter, setFilter] = useState("all");
   const [name, setName] = useState("");
+  const [to, setTo] = useState("");
   const [text, setText] = useState("");
-  const live = list.filter(t => t.text && String(t.text).trim());
-  const rows = [...live].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+  const merged = [
+    ...takes.filter(t => t.text && String(t.text).trim())
+            .map(t => ({ ...t, kind: "takeaway", node: "takeaways" })),
+    ...shouts.filter(s => s.text && String(s.text).trim())
+             .map(s => ({ ...s, kind: "shoutout", node: "shoutouts" }))
+  ];
+  const rows = merged
+    .filter(r => filter === "all" || r.kind === filter)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+  const canPost = text.trim() && (kind === "takeaway" || to.trim());
 
   const post = () => {
-    if (!text.trim()) return;
-    store.push("takeaways", { name: name.trim(), text: text.trim() });
+    if (!canPost) return;
+    if (kind === "shoutout") {
+      store.push("shoutouts", { from: name.trim(), to: to.trim(), text: text.trim() });
+      setTo("");
+    } else {
+      store.push("takeaways", { name: name.trim(), text: text.trim() });
+    }
     setText("");
   };
 
   const exportMd = () => {
-    const md = ["# Takeaways", ""].concat(
-      [...live].sort((a,b)=>(a.ts||0)-(b.ts||0)).map(t =>
-        "- " + t.text + (t.name ? "  \n  _" + t.name + "_" : ""))
-    ).join("\n");
+    const t = merged.filter(r => r.kind === "takeaway").sort((a,b)=>(a.ts||0)-(b.ts||0));
+    const s = merged.filter(r => r.kind === "shoutout").sort((a,b)=>(a.ts||0)-(b.ts||0));
+    const md = ["# Takeaways", ""]
+      .concat(t.map(r => "- " + r.text + (r.name ? "  \n  _" + r.name + "_" : "")))
+      .concat(["", "# Shoutouts", ""])
+      .concat(s.map(r => "- **" + (r.from || "Anonymous") + " to " + r.to + "** " + r.text))
+      .join("\n");
     const url = URL.createObjectURL(new Blob([md], { type: "text/markdown" }));
     const a = document.createElement("a");
     a.href = url; a.download = "acct26-takeaways.md";
@@ -1586,119 +1622,100 @@ function TakeawaysTab({ dm, isAdmin }) {
     URL.revokeObjectURL(url);
   };
 
+  const counts = {
+    all: merged.length,
+    takeaway: merged.filter(r => r.kind === "takeaway").length,
+    shoutout: merged.filter(r => r.kind === "shoutout").length
+  };
+
   return (
     <div className="wrap">
       <h2 className="sectitle">Takeaways</h2>
       <p className="secdesc">
-        What you are taking back with you.
-        {live.length > 0 && <span style={{color:"var(--goldDim)"}}> {live.length} so far.</span>}
+        What you are taking back, and credit where it is due.
+        {merged.length > 0 && (
+          <span style={{ color: "var(--goldDim)" }}> {merged.length} posted.</span>
+        )}
       </p>
 
       {!dm && (
         <div className="card">
-          <input className="field" placeholder="Your name (optional)"
-            value={name} onChange={e => setName(e.target.value)} />
+          <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+            <button className={"pill" + (kind === "takeaway" ? " on" : "")}
+              onClick={() => setKind("takeaway")}>Takeaway</button>
+            <button className={"pill" + (kind === "shoutout" ? " on" : "")}
+              onClick={() => setKind("shoutout")}>Shoutout</button>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <input className="field" style={{ flex: "1 1 130px" }}
+              placeholder={kind === "shoutout" ? "From (optional)" : "Your name (optional)"}
+              value={name} onChange={e => setName(e.target.value)} />
+            {kind === "shoutout" && (
+              <input className="field" style={{ flex: "1 1 130px" }} placeholder="To"
+                value={to} onChange={e => setTo(e.target.value)} />
+            )}
+          </div>
           <textarea className="field" rows={3} style={{ resize: "vertical" }}
-            placeholder="One thing you are taking away"
+            placeholder={kind === "shoutout" ? "What they did" : "One thing you are taking away"}
             value={text} onChange={e => setText(e.target.value)} />
-          <button className="btn" onClick={post} disabled={!text.trim()}>Post takeaway</button>
+          <button className="btn" onClick={post} disabled={!canPost}>
+            {kind === "shoutout" ? "Post shoutout" : "Post takeaway"}
+          </button>
         </div>
       )}
 
-      {isAdmin && live.length > 0 && (
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", paddingBottom: 12 }}>
+        {NOTE_KINDS.map(k => (
+          <button key={k.id} className={"pill" + (filter === k.id ? " on" : "")}
+            onClick={() => setFilter(k.id)}>
+            {k.label}<span style={{ opacity: .6 }}> {counts[k.id]}</span>
+          </button>
+        ))}
+      </div>
+
+      {isAdmin && merged.length > 0 && (
         <div style={{ marginBottom: 13 }}>
-          <button className="btnS" onClick={exportMd}>Export {live.length} to Markdown</button>
+          <button className="btnS" onClick={exportMd}>Export to Markdown</button>
         </div>
       )}
 
       {rows.length === 0 && <p className="empty">Nothing yet. Post the first one.</p>}
 
-      {rows.map(t => (
-        <div key={t._key} className="note">
-          <p>{t.text}</p>
-          <div className="by">
-            {t.name ? t.name : "Anonymous"}{t.ts ? " \u00b7 " + ago(t.ts) : ""}
-          </div>
+      {rows.map(r => (
+        <div key={r.node + r._key} className="note">
+          {r.kind === "shoutout" ? (
+            <>
+              <div className="by" style={{ marginTop: 0, marginBottom: 4 }}>
+                <span className="tag">Shoutout</span>
+                {r.from ? r.from : "Anonymous"} <span className="arrow">&#8594;</span> {r.to}
+              </div>
+              <p>{r.text}</p>
+              <div className="by">{r.ts ? ago(r.ts) : ""}</div>
+            </>
+          ) : (
+            <>
+              <p>{r.text}</p>
+              <div className="by">
+                <span className="tag">Takeaway</span>
+                {r.name ? r.name : "Anonymous"}{r.ts ? " \u00b7 " + ago(r.ts) : ""}
+              </div>
+            </>
+          )}
           {isAdmin && (
             <button className="btnS" style={{ marginTop: 7, borderColor: "var(--danger)", color: "var(--danger)" }}
-              onClick={() => { if (window.confirm("Delete this takeaway?")) store.remove("takeaways", t._key); }}>
-              Delete
-            </button>
+              onClick={() => {
+                if (window.confirm("Delete this " + r.kind + "?")) store.remove(r.node, r._key);
+              }}>Delete</button>
           )}
         </div>
       ))}
 
       {rows.length > 0 && (
         <div className="foot">
-          <span className="footK">{rows.length} {rows.length === 1 ? "takeaway" : "takeaways"}</span>
-          <span className="footV">newest first</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ============================================================
-   SHOUTOUTS
-   ============================================================ */
-function ShoutoutsTab({ dm, isAdmin }) {
-  const [list] = useNode("shoutouts");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [text, setText] = useState("");
-  const live = list.filter(s => s.text && String(s.text).trim());
-  const rows = [...live].sort((a, b) => (b.ts || 0) - (a.ts || 0));
-
-  const post = () => {
-    if (!text.trim() || !to.trim()) return;
-    store.push("shoutouts", { from: from.trim(), to: to.trim(), text: text.trim() });
-    setText(""); setTo("");
-  };
-
-  return (
-    <div className="wrap">
-      <h2 className="sectitle">Shoutouts</h2>
-      <p className="secdesc">
-        Credit where it is due.
-        {live.length > 0 && <span style={{color:"var(--goldDim)"}}> {live.length} posted.</span>}
-      </p>
-
-      {!dm && (
-        <div className="card">
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <input className="field" style={{ flex: "1 1 130px" }} placeholder="From (optional)"
-              value={from} onChange={e => setFrom(e.target.value)} />
-            <input className="field" style={{ flex: "1 1 130px" }} placeholder="To"
-              value={to} onChange={e => setTo(e.target.value)} />
-          </div>
-          <textarea className="field" rows={2} style={{ resize: "vertical" }}
-            placeholder="What they did"
-            value={text} onChange={e => setText(e.target.value)} />
-          <button className="btn" onClick={post} disabled={!text.trim() || !to.trim()}>Post shoutout</button>
-        </div>
-      )}
-
-      {rows.length === 0 && <p className="empty">No shoutouts yet.</p>}
-
-      {rows.map(s => (
-        <div key={s._key} className="note">
-          <div className="by" style={{ marginTop: 0, marginBottom: 4 }}>
-            {s.from ? s.from : "Anonymous"} <span className="arrow">&#8594;</span> {s.to}
-          </div>
-          <p>{s.text}</p>
-          <div className="by">{s.ts ? ago(s.ts) : ""}</div>
-          {isAdmin && (
-            <button className="btnS" style={{ marginTop: 7, borderColor: "var(--danger)", color: "var(--danger)" }}
-              onClick={() => { if (window.confirm("Delete this shoutout?")) store.remove("shoutouts", s._key); }}>
-              Delete
-            </button>
-          )}
-        </div>
-      ))}
-
-      {rows.length > 0 && (
-        <div className="foot">
-          <span className="footK">{rows.length} {rows.length === 1 ? "shoutout" : "shoutouts"}</span>
+          <span className="footK">
+            {rows.length} {rows.length === 1 ? "entry" : "entries"}
+            {filter !== "all" ? " in " + filter + "s" : ""}
+          </span>
           <span className="footV">newest first</span>
         </div>
       )}
@@ -2146,7 +2163,6 @@ function App() {
     { id: "attendees", label: "Attendees" },
     { id: "questions", label: "Questions" },
     { id: "takeaways", label: "Takeaways" },
-    { id: "shoutouts", label: "Shoutouts" },
     { id: "photos", label: "Photos" }
   ];
 
@@ -2176,7 +2192,6 @@ function App() {
       {tab === "attendees" && <AttendeesTab dm={dm} isAdmin={isAdmin} />}
       {tab === "questions" && <QATab dm={dm} isAdmin={isAdmin} />}
       {tab === "takeaways" && <TakeawaysTab dm={dm} isAdmin={isAdmin} />}
-      {tab === "shoutouts" && <ShoutoutsTab dm={dm} isAdmin={isAdmin} />}
       {tab === "photos" && <PhotosTab dm={dm} isAdmin={isAdmin} />}
 
       {askPin && (
