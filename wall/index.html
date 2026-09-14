@@ -160,6 +160,8 @@
   }
   .pbtn:hover{background:var(--gold);color:#12200f}
   .pbtn.cr{right:auto;left:6px}
+  .pbtn.ed{top:auto;bottom:6px;left:6px;right:auto}
+  .addRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
   /* Remove is a small cross at the bottom, so three controls fit a
      narrow card without crowding the top edge. */
   .pbtn.rm{
@@ -239,6 +241,14 @@
   .qMeta{font-size:12px;color:var(--faint);margin-top:4px}
   .qTag{color:var(--goldDim);font-weight:600}
   .ans{opacity:.55}
+
+  /* update notice */
+  .upd{
+    position:fixed;left:0;right:0;bottom:0;z-index:97;
+    background:linear-gradient(90deg,#1f3423,#152a1a);border-top:1px solid var(--gold);
+    padding:11px 16px calc(11px + env(safe-area-inset-bottom,0px));
+    display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:14px
+  }
 
   /* banner + modal */
   .ann{background:linear-gradient(90deg,#1f3423,#152a1a);border-bottom:1px solid var(--gold);padding:9px 16px;display:flex;gap:10px;align-items:center;justify-content:center;font-size:14px}
@@ -677,8 +687,21 @@ const store = (() => {
       write(node, o);
     },
     remove(node, key) { const o = read(node); delete o[key]; write(node, o); },
-    setNode(node, value) { write(node, value || {}); },
-    clearNode(node) { write(node, {}); },
+    // Firebase treats "parent/child" as a path. The local fallback has to
+    // do the same or writes like roster_extra/jane-doe land in their own
+    // flat key instead of inside the parent node.
+    setNode(node, value) {
+      const i = node.indexOf("/");
+      if (i === -1) { write(node, value || {}); return; }
+      const parent = node.slice(0, i), child = node.slice(i + 1);
+      const o = read(parent); o[child] = value || {}; write(parent, o);
+    },
+    clearNode(node) {
+      const i = node.indexOf("/");
+      if (i === -1) { write(node, {}); return; }
+      const parent = node.slice(0, i), child = node.slice(i + 1);
+      const o = read(parent); delete o[child]; write(parent, o);
+    },
     subscribe(node, cb) {
       if (!subs[node]) subs[node] = new Set();
       subs[node].add(cb);
@@ -1406,6 +1429,66 @@ function CropModal({ file, name, onCancel, onSave }) {
   );
 }
 
+/* ============================================================
+   ADD OR EDIT AN ATTENDEE
+   New people and field corrections both live in one Firebase node,
+   keyed by slug. The slug comes from the name and never changes
+   after creation, so a person keeps their photo even if their
+   title or club is edited later.
+   ============================================================ */
+function PersonModal({ person, onCancel, onSave, onDelete }) {
+  const isNew = !person.slug;
+  const [name, setName] = useState(person.name || "");
+  const [title, setTitle] = useState(person.title || "");
+  const [club, setClub] = useState(person.club || "");
+  const [group, setGroup] = useState(person.group || "club");
+  const canSave = isNew ? (name.trim() && club.trim()) : true;
+  return (
+    <div className="ovl" onClick={onCancel}>
+      <div className="modal" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+        <h2 style={{ fontFamily: "var(--ff)", fontSize: 19, marginBottom: 14 }}>
+          {isNew ? "Add an attendee" : "Edit " + person.name}
+        </h2>
+        {isNew ? (
+          <input className="field" placeholder="Full name"
+            value={name} onChange={e => setName(e.target.value)} autoFocus />
+        ) : (
+          <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 10 }}>
+            The name stays fixed so the photo stays attached. Add this person
+            again under a new name if it needs changing.
+          </p>
+        )}
+        <input className="field" placeholder="Title (optional)"
+          value={title} onChange={e => setTitle(e.target.value)} />
+        <input className="field" placeholder="Club, or Home Team Accounting"
+          value={club} onChange={e => setClub(e.target.value)} />
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "4px 0 14px" }}>
+          {[["home", "Home Team"], ["club", "Clubs"], ["century", "Century"]].map(g => (
+            <button key={g[0]} className={"pill" + (group === g[0] ? " on" : "")}
+              onClick={() => setGroup(g[0])}>{g[1]}</button>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn" style={{ flex: 1 }} disabled={!canSave}
+            onClick={() => onSave({
+              name: isNew ? name.trim() : person.name,
+              title: title.trim(), club: club.trim(), group
+            })}>
+            {isNew ? "Add attendee" : "Save changes"}
+          </button>
+          <button className="btnS" style={{ padding: "11px 16px", fontSize: 15 }}
+            onClick={onCancel}>Cancel</button>
+        </div>
+        {!isNew && person.added && (
+          <button className="btnS"
+            style={{ marginTop: 10, width: "100%", borderColor: "var(--danger)", color: "var(--danger)" }}
+            onClick={onDelete}>Remove from the roster</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AttendeesTab({ dm, isAdmin }) {
   const [q, setQ] = useState("");
   const [grp, setGrp] = useState("all");
@@ -1416,7 +1499,9 @@ function AttendeesTab({ dm, isAdmin }) {
   const [got, setGot] = useState({});
   const [busy, setBusy] = useState("");
   const [crop, setCrop] = useState(null);
+  const [edit, setEdit] = useState(null);
   const [, shots] = useNode("roster_photos");
+  const [, extra] = useNode("roster_extra");
   const pick = useRef(null);
   const target = useRef("");
 
@@ -1440,7 +1525,7 @@ function AttendeesTab({ dm, isAdmin }) {
     const f = e.target.files && e.target.files[0];
     const slug = target.current;
     if (!f || !slug) return;
-    const who = ROSTER.find(r => slugOf(r.name) === slug);
+    const who = ROSTER_LIVE.find(r => slugOf(r.name) === slug);
     setCrop({ file: f, slug, name: who ? who.name : slug });
   };
 
@@ -1453,7 +1538,7 @@ function AttendeesTab({ dm, isAdmin }) {
     setBusy(slug);
     try {
       const b = await fetch(src).then(r => r.blob());
-      const who = ROSTER.find(r => slugOf(r.name) === slug);
+      const who = ROSTER_LIVE.find(r => slugOf(r.name) === slug);
       setCrop({
         file: new File([b], "current.jpg", { type: b.type || "image/jpeg" }),
         slug,
@@ -1478,25 +1563,55 @@ function AttendeesTab({ dm, isAdmin }) {
     store.clearNode("roster_photos/" + slug);
     setStep(s => ({ ...s, [slug]: 0 }));
   };
+  // The baked-in list, with any admin edits applied on top, followed by
+  // anyone added at runtime. Keyed by slug throughout so photos stay put.
+  const baseSlugs = {};
+  ROSTER.forEach(p => { baseSlugs[slugOf(p.name)] = true; });
+  const ROSTER_LIVE = ROSTER
+    .map(p => {
+      const o = extra[slugOf(p.name)];
+      return o ? { ...p, title: o.title != null ? o.title : p.title,
+                        club: o.club || p.club, group: o.group || p.group } : p;
+    })
+    .concat(
+      Object.keys(extra || {})
+        .filter(s => !baseSlugs[s] && extra[s] && extra[s].name)
+        .map(s => ({ ...extra[s], added: true }))
+    );
+
   const hit = p => {
     if (grp !== "all" && p.group !== grp) return false;
     const s = q.trim().toLowerCase();
     if (!s) return true;
     return [p.name, p.title, p.club].filter(Boolean).join(" ").toLowerCase().includes(s);
   };
-  const shown = ROSTER.filter(hit);
+  const savePerson = rec => {
+    const slug = edit && edit.slug ? edit.slug : slugOf(rec.name);
+    if (!slug) return;
+    store.setNode("roster_extra/" + slug, { ...rec, ts: Date.now() });
+    setEdit(null);
+  };
+  const deletePerson = () => {
+    if (!edit || !edit.slug) return;
+    if (!window.confirm("Remove " + edit.name + " from the roster?")) return;
+    store.clearNode("roster_extra/" + edit.slug);
+    store.clearNode("roster_photos/" + edit.slug);
+    setEdit(null);
+  };
+
+  const shown = ROSTER_LIVE.filter(hit);
 
   return (
     <div className="wrapWide">
       <h2 className="sectitle">Attendees</h2>
       <p className="secdesc">
         Everyone on the tour this week.
-        {ROSTER.length > 0 && (
-          <span style={{ color: "var(--goldDim)" }}> {ROSTER.length} attending.</span>
+        {ROSTER_LIVE.length > 0 && (
+          <span style={{ color: "var(--goldDim)" }}> {ROSTER_LIVE.length} attending.</span>
         )}
       </p>
 
-      {ROSTER.length === 0 ? (
+      {ROSTER_LIVE.length === 0 ? (
         <div className="pending">
           <b>Roster pending.</b> Names drop straight in.
         </div>
@@ -1512,7 +1627,7 @@ function AttendeesTab({ dm, isAdmin }) {
                 onClick={() => setGrp(g.id)}>
                 {g.label}
                 <span style={{ opacity: .6 }}>
-                  {" "}{g.id === "all" ? ROSTER.length : ROSTER.filter(x => x.group === g.id).length}
+                  {" "}{g.id === "all" ? ROSTER_LIVE.length : ROSTER_LIVE.filter(x => x.group === g.id).length}
                 </span>
               </button>
             ))}
@@ -1527,8 +1642,24 @@ function AttendeesTab({ dm, isAdmin }) {
             </div>
           )}
 
+          {isAdmin && (
+            <div className="addRow">
+              <button className="btn" onClick={() => setEdit({})}>Add an attendee</button>
+              <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                Then tap Add on their card for a photo.
+              </span>
+            </div>
+          )}
+
           <input ref={pick} type="file" accept="image/*"
             onChange={upload} style={{ display: "none" }} />
+
+          {edit && (
+            <PersonModal person={edit}
+              onCancel={() => setEdit(null)}
+              onSave={savePerson}
+              onDelete={deletePerson} />
+          )}
 
           {crop && (
             <CropModal file={crop.file} name={crop.name}
@@ -1551,6 +1682,10 @@ function AttendeesTab({ dm, isAdmin }) {
                   )}
                   {isAdmin && (own || got[slug]) && (
                     <button className="pbtn cr" onClick={() => reframe(slug)}>Crop</button>
+                  )}
+                  {isAdmin && (
+                    <button className="pbtn ed" title="Edit details"
+                      onClick={() => setEdit({ ...p, slug })}>Edit</button>
                   )}
                   {isAdmin && own && (
                     <button className="pbtn rm" title="Remove uploaded photo"
@@ -1915,6 +2050,41 @@ function Logo() {
   );
 }
 
+/* ============================================================
+   UPDATE NOTICE
+   GitHub Pages serves this file with cache-control: max-age=600,
+   so a phone can sit on a copy up to ten minutes old. This re-fetches
+   the page every couple of minutes and offers a reload when the copy
+   on the server differs from the one running.
+   ============================================================ */
+function UpdateNotice() {
+  const [stale, setStale] = useState(false);
+  const mine = useRef(null);
+  useEffect(() => {
+    let dead = false;
+    const check = async () => {
+      try {
+        const r = await fetch(location.pathname + "?v=" + Date.now(), { cache: "reload" });
+        if (!r.ok) return;
+        const t = await r.text();
+        if (mine.current === null) { mine.current = t.length; return; }
+        if (!dead && t.length !== mine.current) setStale(true);
+      } catch (e) { /* offline, try again later */ }
+    };
+    check();
+    const iv = setInterval(check, 120000);
+    return () => { dead = true; clearInterval(iv); };
+  }, []);
+  if (!stale) return null;
+  return (
+    <div className="upd">
+      <span>The wall has been updated.</span>
+      <button className="btnS" onClick={() => location.reload(true)}>Reload</button>
+      <button className="btnS" onClick={() => setStale(false)}>Later</button>
+    </div>
+  );
+}
+
 function AnnBanner() {
   const [list] = useNode("announcements");
   const [hid, setHid] = useState(() => local.get("annHidden", []));
@@ -2195,6 +2365,7 @@ function App() {
   return (
     <div className={"app" + (dm ? " dm" : "")}>
       <AnnBanner />
+      <UpdateNotice />
       <header className="hdr">
         <div className="hdrIn">
           <button className="icobtn" onClick={backToCover}
