@@ -123,6 +123,13 @@
   .detailBtn:hover{color:var(--gold)}
   .detail{margin-top:7px;font-size:14px;color:var(--muted);line-height:1.55;border-left:1px solid var(--border);padding-left:11px}
   .presenter{font-size:12px;color:var(--goldDim);margin-top:5px}
+  .dlink{
+    display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+    background:var(--input);border:1px solid var(--gold);border-radius:8px;
+    padding:7px 13px;font-size:13px;font-weight:600;color:var(--gold);text-decoration:none
+  }
+  .dlink:hover{background:var(--gold);color:#12200f}
+  .dlink:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 
   /* pending banner */
   .pending{background:var(--input);border:1px dashed var(--goldDim);border-radius:9px;padding:12px 14px;margin:16px 0;font-size:14px;color:var(--muted)}
@@ -407,7 +414,7 @@ const AGENDA = [
       { t: "14:30", e: "14:45", kind: "", title: "Century Golf Cares", detail: "", presenter: "Melissa" },
       { t: "14:45", e: "15:00", kind: "", title: "ADP / LMS", detail: "", presenter: "Melissa" },
       { t: "15:00", e: "15:15", kind: "", title: "AI and social media policy", detail: "Includes the acknowledgment form.", presenter: "Melissa" },
-      { t: "15:15", e: "16:00", kind: "", title: "AI & Claude", detail: "", presenter: "Jim Creighton" },
+      { t: "15:15", e: "16:00", kind: "", title: "AI & Claude", detail: "Everything from this session, plus the prompt library, is in the field guide.", link: { label: "Getting Started with Claude", url: "../Getting_Started_with_Claude_CGP_v6.pdf" }, presenter: "Jim Creighton" },
       { t: "16:00", e: "16:30", kind: "", title: "Palmer Networks", detail: "", presenter: "George" },
       { t: "16:30", e: "17:30", kind: "", title: "Spread and expenses", detail: "", presenter: "Greg" },
       { t: "17:30", e: "18:00", kind: "dinner", title: "Dinner served", detail: "Home Team Office.", presenter: "" },
@@ -885,6 +892,17 @@ function Weather({ day, wx }) {
 function AgendaTab({ dm, isAdmin }) {
   const [now, setNow] = useState(new Date());
   const [openRow, setOpenRow] = useState(null);
+  // Only show a document link once the file is really there, so the agenda
+  // can carry a link before the file is uploaded without ever showing a
+  // dead button. It appears on its own once the file lands.
+  const [linkOk, setLinkOk] = useState({});
+  useEffect(() => {
+    AGENDA.flatMap(d => d.ev).filter(e => e.link).forEach(e => {
+      fetch(e.link.url, { method: "HEAD" })
+        .then(r => { if (r.ok) setLinkOk(s => ({ ...s, [e.link.url]: true })); })
+        .catch(() => {});
+    });
+  }, []);
   const wx = useWeather(isAdmin);
 
   const [dayNo, setDayNo] = useState(() => {
@@ -965,7 +983,7 @@ function AgendaTab({ dm, isAdmin }) {
                   {soon && <span className="soon">in {mins}m</span>}
                 </div>
                 {e.kind && <div className="rowMeta">{e.kind}</div>}
-                {(e.detail || (isAdmin && e.presenter)) && (
+                {(e.detail || (e.link && linkOk[e.link.url]) || (isAdmin && e.presenter)) && (
                   <button
                     className="detailBtn"
                     onClick={() => setOpenRow(open ? null : key)}
@@ -977,6 +995,14 @@ function AgendaTab({ dm, isAdmin }) {
                 {open && (
                   <div className="detail">
                     {e.detail}
+                    {e.link && linkOk[e.link.url] && (
+                      <div>
+                        <a className="dlink" href={e.link.url}
+                          target="_blank" rel="noopener noreferrer">
+                          {e.link.label}
+                        </a>
+                      </div>
+                    )}
                     {isAdmin && e.presenter && (
                       <div className="presenter">Presenting: {e.presenter}</div>
                     )}
